@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2019 ePayco.co
+     Manuel Marquez <buzondemam@gmail.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl-3). -->
+<odoo noupdate="1">
+  
+  <record id="payment_acquirer_epayco" model="payment.acquirer">
+    <field name="name">ePayco</field>
+    <field name="sequence">10</field>
+    <field name="provider">epayco</field>
+    <field name="company_id" ref="base.main_company"/>
+    <field name="view_template_id" ref="epayco_form"/>
+    <field name="image" type="base64" file="payment_epayco/static/description/icon.png"/>
+    <field name="module_id" ref="base.module_payment_epayco"/>
+    <field name="environment">test</field>
+    <field name="pre_msg"><![CDATA[
+    <p>You will be redirected to the ePayco website after clicking on the payment button.</p>]]></field>
+    <field name="description" type="html">
+      <p>
+	Secure payments by the ePayco payment platform.
+      </p>
+      <ul class="list-inline">
+        <li class="list-inline-item"><i class="fa fa-check"/>Online Payment</li>
+        <li class="list-inline-item"><i class="fa fa-check"/>Credit cards, debit, cash</li>
+      </ul>
+    </field>
+    <field name="payment_icon_ids" eval='[(6, 0, [ref("payment.payment_icon_cc_mastercard"),
+                                         ref("payment.payment_icon_cc_diners_club_intl"),
+                                         ref("payment.payment_icon_cc_visa"),
+					 ref("payment_epayco.payment_icon_baloto"),
+					 ref("payment_epayco.payment_icon_daviplata"),
+					 ref("payment_epayco.payment_icon_davivienda"),
+					 ref("payment_epayco.payment_icon_efecty"),
+					 ref("payment_epayco.payment_icon_gana"),
+					 ref("payment_epayco.payment_icon_pse"),
+					 ref("payment_epayco.payment_icon_puntored"),
+					 ref("payment_epayco.payment_icon_redservi"),
+					 ref("payment_epayco.payment_icon_safetypay")])]'/>
+    <field name="epayco_p_cust_id">dummy</field>
+    <field name="epayco_p_key">dummy</field>
+    <field name="epayco_public_key">dummy</field>
+    <field name="specific_countries" eval="True"/>
+    <field name="country_ids" eval="[(6, 0, [ref('base.co')])]"/>
+  </record>
+
+</odoo>

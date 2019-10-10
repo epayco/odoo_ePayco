@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2019 ePayco.co
+     Manuel Marquez <buzondemam@gmail.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl-3). -->
+<odoo noupdate="1">
+
+  <record id="epayco_tx_state_1" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="1"/>
+    <field name="odoo_tx_state">done</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_2" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="2"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_3" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="3"/>
+    <field name="odoo_tx_state">pending</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_4" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="4"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_6" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="6"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_7" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="7"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_8" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="8"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_9" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="9"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_10" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="10"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_11" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="11"/>
+    <field name="odoo_tx_state">cancel</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_tx_state_12" model="epayco.tx.state">
+    <field name="epayco_tx_code" eval="12"/>
+    <field name="odoo_tx_state">error</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+</odoo>

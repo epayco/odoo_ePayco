@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_epayco_franchise_all,epayco.franchise.all,model_epayco_franchise,,1,0,0,0
+access_epayco_franchise_system,epayco.franchise.system,model_epayco_franchise,base.group_system,1,1,1,1
+access_epayco_tx_state_all,epayco.tx.state.all,model_epayco_tx_state,,1,0,0,0
+access_epayco_tx_state_system,epayco.tx.state.system,model_epayco_tx_state,base.group_system,1,1,1,1
+access_epayco_document_type_all,epayco.document.type.all,model_epayco_document_type,,1,0,0,0
+access_epayco_document_type_system,epayco.document.type.system,model_epayco_document_type,base.group_system,1,1,1,1

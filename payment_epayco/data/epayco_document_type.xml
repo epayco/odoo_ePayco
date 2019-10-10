@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- © 2019 ePayco.co
+     Manuel Marquez <buzondemam@gmail.com>
+     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl-3). -->
+<odoo noupdate="1">
+
+  <record id="epayco_document_type_cc" model="epayco.document.type">
+    <field name="epayco_document_type">CC</field>
+    <field name="l10n_co_document_type">national_citizen_id</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_document_type_ce" model="epayco.document.type">
+    <field name="epayco_document_type">CE</field>
+    <field name="l10n_co_document_type">foreign_id_card</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_document_type_ppn" model="epayco.document.type">
+    <field name="epayco_document_type">PPN</field>
+    <field name="l10n_co_document_type">passport</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_document_type_nit" model="epayco.document.type">
+    <field name="epayco_document_type">NIT</field>
+    <field name="l10n_co_document_type">rut</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_document_type_ti" model="epayco.document.type">
+    <field name="epayco_document_type">TI</field>
+    <field name="l10n_co_document_type">id_card</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+  
+</odoo>

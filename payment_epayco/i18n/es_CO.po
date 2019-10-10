@@ -1,0 +1,358 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* payment_epayco
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-10 20:19+0000\n"
+"PO-Revision-Date: 2019-10-10 17:07-0400\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es_CO\n"
+"X-Generator: Poedit 2.2\n"
+
+#. module: payment_epayco
+#: model_terms:ir.ui.view,arch_db:payment_epayco.checkout
+msgid "<span class=\"sr-only\">Loading...</span>"
+msgstr ""
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,cancel_msg:payment_epayco.payment_acquirer_epayco
+msgid "<span><i>Cancel,</i> Your payment has been cancelled.</span>"
+msgstr "<span><i>Cancelado,</i> Su pago ha sido cancelado.</span>"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,done_msg:payment_epayco.payment_acquirer_epayco
+msgid "<span><i>Done,</i> Your online payment has been successfully processed. Thank you for your order.</span>"
+msgstr "<span><i>Aprobado,</i> su pago en línea ha sido porcesado satisfactoriamente. Gracias por su orden.</span>"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,error_msg:payment_epayco.payment_acquirer_epayco
+msgid "<span><i>Error,</i> Please be aware that an error occurred during the transaction. The order has been confirmed but will not be paid. Do not hesitate to contact us if you have any questions on the status of your order.</span>"
+msgstr ""
+"%\n"
+"match\n"
+"<span><i>Error,</i> Tenga en cuenta por favor que ha ocurrido un error durante la transacción. La orden ha sido confirmada, pero no se ha efectuado el pago. No dude en contactarnos si usted tiene alguna pregunta sobre el estado de su orden.</span>"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,pending_msg:payment_epayco.payment_acquirer_epayco
+msgid "<span><i>Pending,</i> Your online payment has been successfully processed. But your order is not validated yet.</span>"
+msgstr "<span><i>Pendiente,</i> su orden ha sido procesada satisfactoriamente, pero no ha sido validada satisfactoriamente.</span>"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__active
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__active
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: payment_epayco
+#: model_terms:ir.ui.view,arch_db:payment_epayco.checkout
+msgid "Cargando medios de pago de ePayco..."
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_checkout_type
+msgid "Checkout Type"
+msgstr "Tipo de Checkout"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__code
+msgid "Code"
+msgstr "Código"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/epayco_franchise.py:23
+#: sql_constraint:epayco.franchise:0
+#, python-format
+msgid "Code already exists for a franchise."
+msgstr "El código ya existe."
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_epayco_document_type__epayco_document_type
+msgid "Code of document type comming from ePayco."
+msgstr "Codigo de tipo de documento que viene de ePayco."
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_epayco_tx_state__epayco_tx_code
+msgid "Code of state of transaction comming from ePayco."
+msgstr "Código del estado de la transacción que viene de ePayco."
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__create_uid
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__create_uid
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__create_date
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__create_date
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: payment_epayco
+#: model_terms:ir.ui.view,arch_db:payment_epayco.acquirer_form_epayco
+msgid "Credentials ePayco"
+msgstr "Credenciales ePayco"
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_payment_acquirer__epayco_p_cust_id
+msgid "Customer ID that identifies you in ePayco.You can find it in your dashboard in the configuration option."
+msgstr "ID de cliente ePayco. Lo puede encontrar en su dashboard de ePayco. "
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__display_name
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__display_name
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__display_name
+msgid "Display Name"
+msgstr "Nombre a mostrar"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__l10n_co_document_type
+msgid "Document Type"
+msgstr "Tipo de Documento"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_document_type_ids
+#: model_terms:ir.ui.view,arch_db:payment_epayco.acquirer_form_epayco
+msgid "Document Types"
+msgstr "Tipos de Documentos"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/payment_transaction.py:136
+#, python-format
+msgid "Error: feedback error %s (%s)"
+msgstr "Error: %s (%s)"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_franchise_ids
+#: model_terms:ir.ui.view,arch_db:payment_epayco.acquirer_form_epayco
+msgid "Franchises"
+msgstr "Franquicias"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,post_msg:payment_epayco.payment_acquirer_epayco
+msgid "Gracias por su compra.<br>"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__id
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__id
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__id
+msgid "ID"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_payment_acquirer__epayco_public_key
+msgid "Key to authenticate and consume ePayco services.You can find it in your dashboard in the configuration option."
+msgstr "Clave para autenticarse y consumir los servicios de ePayco. Puede encontrarla en su dashboard de ePayco."
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_payment_acquirer__epayco_p_key
+msgid "Key to sign the information sent and received from ePayco.You can find it in your dashboard in the configuration option."
+msgstr "Clave para firmar la información enviada y recibida desde ePayco. Puede encontrarla en su dashboard de ePayco."
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type____last_update
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise____last_update
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state____last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__write_uid
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__write_uid
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__write_date
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__write_date
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: payment_epayco
+#: selection:payment.acquirer,provider:0
+msgid "Manual Configuration"
+msgstr "Configuración manual"
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_payment_acquirer__epayco_document_type_ids
+msgid "Mapping of ePayco document types according toodoo document types."
+msgstr "Relación entre los tipos de documentos de ePayco  y los tipos de documentos de Odoo."
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_payment_acquirer__epayco_tx_state_ids
+msgid "Mapping of ePayco transaction states according toodoo transaction states."
+msgstr "Relación entre los estados de transacciones ePayco y los estados de transacciones de Odoo."
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__odoo_tx_state
+msgid "Odoo Transaction State"
+msgstr "Estado de Transacción de Odoo"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/payment_transaction.py:126
+#, python-format
+msgid "Ok: %s"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,help:payment_epayco.field_epayco_document_type__payment_acquirer_id
+#: model:ir.model.fields,help:payment_epayco.field_epayco_franchise__payment_acquirer_id
+#: model:ir.model.fields,help:payment_epayco.field_epayco_tx_state__payment_acquirer_id
+msgid "Only valid for ePayco."
+msgstr "Solo valido para ePayco."
+
+#. module: payment_epayco
+#: selection:payment.acquirer,epayco_checkout_type:0
+msgid "Onpage Checkout"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_public_key
+msgid "PUBLIC_KEY"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_p_cust_id
+msgid "P_CUST_ID_CLIENTE"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_p_key
+msgid "P_KEY"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model,name:payment_epayco.model_payment_acquirer
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__payment_acquirer_id
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__payment_acquirer_id
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__payment_acquirer_id
+msgid "Payment Acquirer"
+msgstr "Método de Pago"
+
+#. module: payment_epayco
+#: model:ir.model,name:payment_epayco.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "Transacción del Pago"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__provider
+msgid "Provider"
+msgstr "Proveedor"
+
+#. module: payment_epayco
+#: model_terms:ir.ui.view,arch_db:payment_epayco.checkout
+msgid "Si no se cargan automáticamente, de clic en el botón \"Pagar con ePayco\"."
+msgstr ""
+
+#. module: payment_epayco
+#: selection:payment.acquirer,epayco_checkout_type:0
+msgid "Standard Checkout"
+msgstr ""
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/payment_transaction.py:130
+#: code:addons/payment_epayco/models/payment_transaction.py:133
+#, python-format
+msgid "State: %s (%s)"
+msgstr "Estado: %s (%s)"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/payment_acquirer.py:76
+#, python-format
+msgid "There is no ePayco document type related to customer documenttype %s."
+msgstr "No existe tipo de documento de ePayco asociado al tipo de documento <%s> del cliente."
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_tx_state_ids
+#: model_terms:ir.ui.view,arch_db:payment_epayco.acquirer_form_epayco
+msgid "Transaction States"
+msgstr "Estados de Transacción"
+
+#. module: payment_epayco
+#: selection:payment.acquirer,provider:0
+msgid "Wire Transfer"
+msgstr "Transferencia bancaria"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,pre_msg:payment_epayco.payment_acquirer_epayco
+msgid "You will be redirected to the ePayco website after clicking on the payment button."
+msgstr "Sera redirigido al sitio web de ePayco después de clickear en el pago."
+
+#. module: payment_epayco
+#: model:payment.acquirer,name:payment_epayco.payment_acquirer_epayco
+#: selection:payment.acquirer,provider:0
+msgid "ePayco"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__epayco_tx_code
+msgid "ePayco Code"
+msgstr "Código ePayco"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__epayco_document_type
+msgid "ePayco Document Type"
+msgstr "Tipo de Documento ePayco"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_transaction__epayco_franchise_id
+msgid "ePayco Franchise"
+msgstr "Franquicia ePayco"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_transaction__epayco_txid
+msgid "ePayco Transaction ID"
+msgstr "ID de Transacción de ePayco"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/epayco_tx_state.py:38
+#: sql_constraint:epayco.tx.state:0
+#, python-format
+msgid "ePayco code already exists."
+msgstr "El código ePayco ya existe"
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/epayco_document_type.py:37
+#: sql_constraint:epayco.document.type:0
+#, python-format
+msgid "ePayco document type already exists."
+msgstr "El tipo de documento ePayco ya existe."
+
+#. module: payment_epayco
+#: model:ir.model,name:payment_epayco.model_epayco_document_type
+msgid "epayco.document.type"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model,name:payment_epayco.model_epayco_franchise
+msgid "epayco.franchise"
+msgstr ""
+
+#. module: payment_epayco
+#: model:ir.model,name:payment_epayco.model_epayco_tx_state
+msgid "epayco.tx.state"
+msgstr ""
+
+#. module: payment_epayco
+#: code:addons/payment_epayco/models/payment_transaction.py:104
+#, python-format
+msgid "no odoo transaction status has been associated with epayco's state code %s."
+msgstr "No se ha asociado ningún estado de transacción de Odoo con el código de estado de transacción ePayco %s."
