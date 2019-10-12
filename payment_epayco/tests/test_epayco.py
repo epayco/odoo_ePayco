@@ -96,7 +96,6 @@ class EpaycoTest(EpaycoCommon):
                 'billing_partner_phone'),
             'billing_partner_vat': self.buyer.vat,
             'reference': 'SO400',
-            'order_reference': 'YourCompany: SO400',
         }
 
         for form_input in tree.input:

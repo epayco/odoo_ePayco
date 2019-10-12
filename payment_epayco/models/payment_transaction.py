@@ -15,10 +15,9 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    epayco_txid = fields.Char('ePayco Transaction ID')
     epayco_franchise_id = fields.Many2one(
         comodel_name='epayco.franchise',
-        string='ePayco Franchise')
+        string='Franchise')
 
     @api.multi
     def get_tx_signature(self, data):
@@ -111,7 +110,6 @@ class PaymentTransaction(models.Model):
         update odoo transaction."""
         state = self._get_epayco_tx_state(data.get('x_cod_transaction_state'))
         vals = {
-            'epayco_txid': data.get('x_transaction_id'),
             'acquirer_reference': data.get('x_transaction_id'),
         }
 

@@ -10,7 +10,6 @@
     <field name="inherit_id" ref="payment.transaction_form"/>
     <field name="arch" type="xml">
       <field name="date" position="after">
-        <field name="epayco_txid"/>
 	<field name="epayco_franchise_id"/>
       </field>
     </field>

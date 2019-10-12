@@ -96,7 +96,5 @@ class PaymentAcquirer(models.Model):
                 base_url, EpaycoController._response_url),
             'confirmation_url': urls.url_join(
                 base_url, EpaycoController._confirmation_url),
-            'order_reference': '%s: %s' % (
-                self.company_id.name, values['reference']),
         })
         return epayco_tx_values

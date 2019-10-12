@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 12.0\n"
+"Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-10 20:19+0000\n"
-"PO-Revision-Date: 2019-10-10 17:07-0400\n"
+"POT-Creation-Date: 2019-10-12 01:48+0000\n"
+"PO-Revision-Date: 2019-10-11 21:50-0400\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -24,26 +24,23 @@ msgstr ""
 
 #. module: payment_epayco
 #: model_terms:payment.acquirer,cancel_msg:payment_epayco.payment_acquirer_epayco
-msgid "<span><i>Cancel,</i> Your payment has been cancelled.</span>"
-msgstr "<span><i>Cancelado,</i> Su pago ha sido cancelado.</span>"
-
-#. module: payment_epayco
-#: model_terms:payment.acquirer,done_msg:payment_epayco.payment_acquirer_epayco
-msgid "<span><i>Done,</i> Your online payment has been successfully processed. Thank you for your order.</span>"
-msgstr "<span><i>Aprobado,</i> su pago en línea ha sido porcesado satisfactoriamente. Gracias por su orden.</span>"
+msgid "<span><i>Cancelar,</i> Su pago ha sido cancelado.</span>"
+msgstr ""
 
 #. module: payment_epayco
 #: model_terms:payment.acquirer,error_msg:payment_epayco.payment_acquirer_epayco
-msgid "<span><i>Error,</i> Please be aware that an error occurred during the transaction. The order has been confirmed but will not be paid. Do not hesitate to contact us if you have any questions on the status of your order.</span>"
+msgid "<span><i>Error,</i> Tenga en cuenta que se produjo un error durante la transacción. El pedido ha sido confirmado pero no será pagado. No dude en contactarnos si tiene alguna pregunta sobre el estado de su pedido.</span>"
 msgstr ""
-"%\n"
-"match\n"
-"<span><i>Error,</i> Tenga en cuenta por favor que ha ocurrido un error durante la transacción. La orden ha sido confirmada, pero no se ha efectuado el pago. No dude en contactarnos si usted tiene alguna pregunta sobre el estado de su orden.</span>"
+
+#. module: payment_epayco
+#: model_terms:payment.acquirer,done_msg:payment_epayco.payment_acquirer_epayco
+msgid "<span><i>Hecho,</i>Su pago en línea ha sido procesado con éxito. Gracias por su orden.</span>"
+msgstr ""
 
 #. module: payment_epayco
 #: model_terms:payment.acquirer,pending_msg:payment_epayco.payment_acquirer_epayco
-msgid "<span><i>Pending,</i> Your online payment has been successfully processed. But your order is not validated yet.</span>"
-msgstr "<span><i>Pendiente,</i> su orden ha sido procesada satisfactoriamente, pero no ha sido validada satisfactoriamente.</span>"
+msgid "<span><i>Pendiente,</i>Su pago en línea ha sido procesado con éxito. Pero su pedido no está validado aún.</span>"
+msgstr ""
 
 #. module: payment_epayco
 #: model:ir.model.fields,field_description:payment_epayco.field_epayco_document_type__active
@@ -127,10 +124,15 @@ msgid "Document Types"
 msgstr "Tipos de Documentos"
 
 #. module: payment_epayco
-#: code:addons/payment_epayco/models/payment_transaction.py:136
+#: code:addons/payment_epayco/models/payment_transaction.py:134
 #, python-format
 msgid "Error: feedback error %s (%s)"
 msgstr "Error: %s (%s)"
+
+#. module: payment_epayco
+#: model:ir.model.fields,field_description:payment_epayco.field_payment_transaction__epayco_franchise_id
+msgid "Franchise"
+msgstr "Franquicia"
 
 #. module: payment_epayco
 #: model:ir.model.fields,field_description:payment_epayco.field_payment_acquirer__epayco_franchise_ids
@@ -140,7 +142,7 @@ msgstr "Franquicias"
 
 #. module: payment_epayco
 #: model_terms:payment.acquirer,post_msg:payment_epayco.payment_acquirer_epayco
-msgid "Gracias por su compra.<br>"
+msgid "Gracias por su compra<br>"
 msgstr ""
 
 #. module: payment_epayco
@@ -207,7 +209,7 @@ msgid "Odoo Transaction State"
 msgstr "Estado de Transacción de Odoo"
 
 #. module: payment_epayco
-#: code:addons/payment_epayco/models/payment_transaction.py:126
+#: code:addons/payment_epayco/models/payment_transaction.py:124
 #, python-format
 msgid "Ok: %s"
 msgstr ""
@@ -245,7 +247,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__payment_acquirer_id
 #: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__payment_acquirer_id
 msgid "Payment Acquirer"
-msgstr "Método de Pago"
+msgstr "Adquirente del Pago"
 
 #. module: payment_epayco
 #: model:ir.model,name:payment_epayco.model_payment_transaction
@@ -268,8 +270,8 @@ msgid "Standard Checkout"
 msgstr ""
 
 #. module: payment_epayco
-#: code:addons/payment_epayco/models/payment_transaction.py:130
-#: code:addons/payment_epayco/models/payment_transaction.py:133
+#: code:addons/payment_epayco/models/payment_transaction.py:128
+#: code:addons/payment_epayco/models/payment_transaction.py:131
 #, python-format
 msgid "State: %s (%s)"
 msgstr "Estado: %s (%s)"
@@ -313,16 +315,6 @@ msgid "ePayco Document Type"
 msgstr "Tipo de Documento ePayco"
 
 #. module: payment_epayco
-#: model:ir.model.fields,field_description:payment_epayco.field_payment_transaction__epayco_franchise_id
-msgid "ePayco Franchise"
-msgstr "Franquicia ePayco"
-
-#. module: payment_epayco
-#: model:ir.model.fields,field_description:payment_epayco.field_payment_transaction__epayco_txid
-msgid "ePayco Transaction ID"
-msgstr "ID de Transacción de ePayco"
-
-#. module: payment_epayco
 #: code:addons/payment_epayco/models/epayco_tx_state.py:38
 #: sql_constraint:epayco.tx.state:0
 #, python-format
@@ -352,7 +344,7 @@ msgid "epayco.tx.state"
 msgstr ""
 
 #. module: payment_epayco
-#: code:addons/payment_epayco/models/payment_transaction.py:104
+#: code:addons/payment_epayco/models/payment_transaction.py:103
 #, python-format
 msgid "no odoo transaction status has been associated with epayco's state code %s."
 msgstr "No se ha asociado ningún estado de transacción de Odoo con el código de estado de transacción ePayco %s."
