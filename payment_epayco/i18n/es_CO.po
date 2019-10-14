@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-12 01:48+0000\n"
-"PO-Revision-Date: 2019-10-11 21:50-0400\n"
+"POT-Creation-Date: 2019-10-14 11:45+0000\n"
+"PO-Revision-Date: 2019-10-14 07:46-0400\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -209,6 +209,13 @@ msgid "Odoo Transaction State"
 msgstr "Estado de Transacción de Odoo"
 
 #. module: payment_epayco
+#: code:addons/payment_epayco/models/epayco_document_type.py:37
+#: sql_constraint:epayco.document.type:0
+#, python-format
+msgid "Odoo document type has already been mapped."
+msgstr "Este tipo de documento Odoo ya fue mapeado a un tipo de documento ePayco."
+
+#. module: payment_epayco
 #: code:addons/payment_epayco/models/payment_transaction.py:124
 #, python-format
 msgid "Ok: %s"
@@ -247,7 +254,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:payment_epayco.field_epayco_franchise__payment_acquirer_id
 #: model:ir.model.fields,field_description:payment_epayco.field_epayco_tx_state__payment_acquirer_id
 msgid "Payment Acquirer"
-msgstr "Adquirente del Pago"
+msgstr "Adquiridor del Pago"
 
 #. module: payment_epayco
 #: model:ir.model,name:payment_epayco.model_payment_transaction
@@ -320,13 +327,6 @@ msgstr "Tipo de Documento ePayco"
 #, python-format
 msgid "ePayco code already exists."
 msgstr "El código ePayco ya existe"
-
-#. module: payment_epayco
-#: code:addons/payment_epayco/models/epayco_document_type.py:37
-#: sql_constraint:epayco.document.type:0
-#, python-format
-msgid "ePayco document type already exists."
-msgstr "El tipo de documento ePayco ya existe."
 
 #. module: payment_epayco
 #: model:ir.model,name:payment_epayco.model_epayco_document_type

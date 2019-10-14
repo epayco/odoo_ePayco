@@ -32,6 +32,6 @@ class EpaycoDocumentType(models.Model):
         help='Only valid for ePayco.')
 
     _sql_constraints = [(
-        'epayco_document_type_unique',
-        'unique(epayco_document_type)',
-        _('ePayco document type already exists.'))]
+        'l10n_co_document_type_unique',
+        'unique(l10n_co_document_type)',
+        _('Odoo document type has already been mapped.'))]
