@@ -84,8 +84,8 @@ class PaymentTransaction(models.Model):
                 ('Transaction Id', data.get('x_transaction_id'),
                  self.acquirer_reference))
 
-        if int(self.acquirer_id.epayco_p_cust_id) != data.get(
-                'x_cust_id_cliente'):
+        if int(self.acquirer_id.epayco_p_cust_id) != int(data.get(
+                'x_cust_id_cliente')):
             invalid_parameters.append((
                 'Customer ID',
                 data.get('x_cust_id_cliente'),
@@ -123,7 +123,8 @@ class PaymentTransaction(models.Model):
         if state == 'done':
             vals['state_message'] = _('Ok: %s') % data.get(
                 'x_transaction_state')
-            self._set_transaction_done()
+            if self.state != 'done':
+                self._set_transaction_done()
         elif state == 'pending':
             state_message = _('State: %s (%s)')
             self._set_transaction_pending()

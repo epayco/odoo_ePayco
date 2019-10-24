@@ -9,7 +9,7 @@ import requests
 import werkzeug
 
 from odoo import http
-from odoo.http import request
+from odoo.http import request, Response
 
 _logger = logging.getLogger(__name__)
 
@@ -29,21 +29,56 @@ class EpaycoController(http.Controller):
         })
         return request.render('payment_epayco.checkout', post)
 
+    def _post_process_tx(self, data):
+        """Post process transaction to confirm the sale order and
+        to generate the invoices if needed."""
+        tx_reference = data.get('x_id_invoice')
+        payment_transaction = request.env['payment.transaction'].sudo()
+
+        tx = payment_transaction.search([('reference', '=', tx_reference)])
+
+        if not tx:
+            _logger.exception('Transaction post processing failed. '
+                              'Not found any transaction with reference %s',
+                              tx_reference)
+
+        return tx.sudo()._post_process_after_done()
+
+    def _epayco_process_response(self, data, confirmation=False):
+        if not confirmation:
+            ref_payco = data.get('ref_payco')
+            url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
+                ref_payco)
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json().get('data')
+                _logger.info('Beginning form_feedback with post data %s',
+                             pprint.pformat(data))
+                request.env['payment.transaction'].sudo().form_feedback(
+                    data, 'epayco')
+                return werkzeug.utils.redirect('/payment/process')
+            _logger.warning('ePayco: Request to API ePayco failed.')
+        else:
+            request.env['payment.transaction'].sudo().form_feedback(
+                data, 'epayco')
+            self._post_process_tx(data)
+            return Response(status=200)
+
     @http.route(
-        ['/payment/epayco/response/', '/payment/epayco/confirmation/'],
+        ['/payment/epayco/response/'],
         type='http',
         csrf=False,
         website=True)
     def epayco_return_url(self, **post):
         """Process response from ePayco after process payment."""
-        ref_payco = post.get('ref_payco')
-        url = 'https://secure.epayco.co/validation/v1/reference/%s' % ref_payco
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json().get('data')
-            _logger.info('Beginning form_feedback with post data %s',
-                         pprint.pformat(data))
-            request.env['payment.transaction'].sudo().form_feedback(
-                data, 'epayco')
-            return werkzeug.utils.redirect('/payment/process')
-        _logger.warning('ePayco: Request to API ePayco failed.')
+        return self._epayco_process_response(post)
+
+    @http.route(
+        ['/payment/epayco/confirmation/'],
+        type='http',
+        csrf=False,
+        website=True,
+        auth='public')
+    def epayco_payment_confirmation_url(self, **post):
+        """Process payment confirmation from ePayco."""
+        return self._epayco_process_response(post, confirmation=True)
