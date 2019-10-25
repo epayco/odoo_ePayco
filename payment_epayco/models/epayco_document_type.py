@@ -3,7 +3,7 @@
 # - Manuel Marquez <buzondemam@gmail.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class EpaycoDocumentType(models.Model):
@@ -30,8 +30,3 @@ class EpaycoDocumentType(models.Model):
         comodel_name='payment.acquirer',
         string='Payment Acquirer',
         help='Only valid for ePayco.')
-
-    _sql_constraints = [(
-        'l10n_co_document_type_unique',
-        'unique(l10n_co_document_type)',
-        _('Odoo document type has already been mapped.'))]
