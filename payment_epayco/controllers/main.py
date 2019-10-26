@@ -42,7 +42,10 @@ class EpaycoController(http.Controller):
                               'Not found any transaction with reference %s',
                               tx_reference)
 
-        return tx.sudo()._post_process_after_done()
+        if tx.state == 'done':
+            return tx.sudo()._post_process_after_done()
+        elif tx.state != 'pending':
+            return tx.sudo()._log_payment_transaction_received()
 
     def _epayco_process_response(self, data, confirmation=False):
         if not confirmation:
