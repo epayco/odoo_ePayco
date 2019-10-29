@@ -50,11 +50,18 @@ class EpaycoController(http.Controller):
     def _epayco_process_response(self, data, confirmation=False):
         if not confirmation:
             ref_payco = data.get('ref_payco')
+
+            if ref_payco is None:
+                _logger.debug('User error in ePayco checkout: %s', data)
+                return werkzeug.utils.redirect('/shop/payment')
+
             url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
                 ref_payco)
             response = requests.get(url)
+
             if response.status_code == 200:
                 data = response.json().get('data')
+
                 _logger.info('Beginning form_feedback with post data %s',
                              pprint.pformat(data))
                 request.env['payment.transaction'].sudo().form_feedback(
