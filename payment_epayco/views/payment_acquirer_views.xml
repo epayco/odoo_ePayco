@@ -19,7 +19,7 @@
       </xpath>
 
       <xpath expr="//group[@name='acquirer_config']" position="inside">
-	<field name="epayco_checkout_type"/>
+	<field name="epayco_checkout_type" attrs="{'invisible': [('provider', '!=', 'epayco')]}"/>
       </xpath>
 
       <xpath expr="//group[@name='acquirer_config']" position="after">
