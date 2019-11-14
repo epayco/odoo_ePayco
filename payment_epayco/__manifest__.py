@@ -8,7 +8,7 @@
     'category': 'Accounting',
     'author': 'ePayco',
     "maintainers": ["mamcode"],
-    'development_status': 'Alpha',
+    'development_status': 'Production/Stable',
     'website': 'https://epayco.co/',
     'license': 'AGPL-3',
     'version': '12.0.1.0.0',
