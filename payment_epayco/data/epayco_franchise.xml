@@ -77,4 +77,22 @@
     <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
   </record>
 
+  <record id="epayco_franchise_mpd" model="epayco.franchise">
+    <field name="code">MPD</field>
+    <field name="name">Davivienda Puntos y/o Tarjetas de crédito</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_franchise_dp" model="epayco.franchise">
+    <field name="code">DP</field>
+    <field name="name">Daviplata</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
+  <record id="epayco_franchise_pp" model="epayco.franchise">
+    <field name="code">PP</field>
+    <field name="name">PayPay</field>
+    <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
+  </record>
+
 </odoo>
