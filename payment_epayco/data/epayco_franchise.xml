@@ -91,7 +91,7 @@
 
   <record id="epayco_franchise_pp" model="epayco.franchise">
     <field name="code">PP</field>
-    <field name="name">PayPay</field>
+    <field name="name">PayPal</field>
     <field name="payment_acquirer_id" ref="payment_epayco.payment_acquirer_epayco"/>
   </record>
 
