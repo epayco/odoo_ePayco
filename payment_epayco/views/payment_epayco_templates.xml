@@ -50,15 +50,13 @@
 
 	      <div id="form-button-container">
 		<form>
-		  <t t-if="with_tax">
+		  <t t-if="amount_untaxed > amount">
 		      <script
 		          src="https://checkout.epayco.co/checkout.js"
 		          class="epayco-button"
 		          data-epayco-autoclick="true"
 		          t-att-data-epayco-key="epayco_public_key"
 		          t-att-data-epayco-amount="amount"
-		          t-att-data-epayco-tax="amount_tax"
-		          t-att-data-epayco-tax-base="amount_untaxed"
 		          t-att-data-epayco-name="reference"
 		          t-att-data-epayco-description="reference"
 		          t-att-data-epayco-invoice="reference"
@@ -84,6 +82,8 @@
 		          data-epayco-autoclick="true"
 		          t-att-data-epayco-key="epayco_public_key"
 		          t-att-data-epayco-amount="amount"
+		          t-att-data-epayco-tax="amount_tax"
+		          t-att-data-epayco-tax-base="amount_untaxed"
 		          t-att-data-epayco-name="reference"
 		          t-att-data-epayco-description="reference"
 		          t-att-data-epayco-invoice="reference"

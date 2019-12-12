@@ -24,14 +24,9 @@ class EpaycoController(http.Controller):
         """Render template to redirect to ePayco checkout."""
         order = request.website.sale_get_order()
         post_data = {
-            'with_tax': True,
             'amount_tax': order.amount_tax,
             'amount_untaxed': order.amount_untaxed,
         }
-        if order.amount_untaxed > order.amount_total:
-            post_data = {
-                'with_tax': False
-            }
         post.update(post_data)
         return request.render('payment_epayco.checkout', post)
 
