@@ -13,9 +13,9 @@ Epayco Payment Acquirer
 .. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
-.. |badge3| image:: https://img.shields.io/badge/github-epayco%2Fodoo--ePayco-lightgray.png?logo=github
-    :target: https://github.com/epayco/odoo-ePayco/tree/12.0/payment_epayco
-    :alt: epayco/odoo-ePayco
+.. |badge3| image:: https://img.shields.io/badge/github-epayco%2Fodoo_ePayco-lightgray.png?logo=github
+    :target: https://github.com/epayco/odoo_ePayco/tree/12.0/payment_epayco
+    :alt: epayco/odoo_ePayco
 
 |badge1| |badge2| |badge3| 
 
@@ -25,6 +25,16 @@ Epayco Payment Acquirer.
 
 .. contents::
    :local:
+
+Installation
+============
+
+Para instalar este modulo necesita:
+
+1. Agregar el directorio clonado de este repositorio a la ruta de addons de la instancia de Odoo.
+2. Ir a la base de datos y actualizar la lista de aplicaciones.
+3. Instalar el modulo payment_epayco.
+   
 
 Configuration
 =============
@@ -57,10 +67,10 @@ Configuration
 Bug Tracker
 ===========
 
-Bugs are tracked on `GitHub Issues <https://github.com/epayco/odoo-ePayco/issues>`_.
+Bugs are tracked on `GitHub Issues <https://github.com/epayco/odoo_ePayco/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us smashing it by providing a detailed and welcomed
-`feedback <https://github.com/epayco/odoo-ePayco/issues/new?body=module:%20payment_epayco%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/epayco/odoo_ePayco/issues/new?body=module:%20payment_epayco%0Aversion:%2012.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -95,6 +105,6 @@ Current maintainer:
 
 |maintainer-mamcode| 
 
-This module is part of the `epayco/odoo-ePayco <https://github.com/epayco/odoo-ePayco/tree/12.0/payment_epayco>`_ project on GitHub.
+This module is part of the `epayco/odoo_ePayco <https://github.com/epayco/odoo_ePayco/tree/12.0/payment_epayco>`_ project on GitHub.
 
 You are welcome to contribute.
