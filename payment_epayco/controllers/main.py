@@ -23,10 +23,11 @@ class EpaycoController(http.Controller):
     def epayco_checkout(self, **post):
         """Render template to redirect to ePayco checkout."""
         order = request.website.sale_get_order()
-        post.update({
+        post_data = {
             'amount_tax': order.amount_tax,
             'amount_untaxed': order.amount_untaxed,
-        })
+        }
+        post.update(post_data)
         return request.render('payment_epayco.checkout', post)
 
     def _post_process_tx(self, data):
