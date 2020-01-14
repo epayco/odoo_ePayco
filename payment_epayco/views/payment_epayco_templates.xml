@@ -50,7 +50,7 @@
 
 	      <div id="form-button-container">
 		<form>
-		  <t t-if="amount_untaxed > amount">
+		  <t t-if="(amount_untaxed + amount_tax) > float(amount)">
 		      <script
 		          src="https://checkout.epayco.co/checkout.js"
 		          class="epayco-button"
