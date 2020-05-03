@@ -15,6 +15,7 @@
 	<input type="hidden" name="country_code" t-att-value="country_code"/>
 	<input type="hidden" name="epayco_env_test" t-att-value="epayco_env_test"/>
 	<input type="hidden" name="reference" t-att-value="reference"/>
+	<input type="hidden" name="order" t-att-value="order"/>
 	<input type="hidden" name="epayco_lang" t-att-value="epayco_lang"/>
 	<input type="hidden" name="response_url" t-att-value="response_url"/>
 	<input type="hidden" name="confirmation_url" t-att-value="confirmation_url"/>
@@ -59,7 +60,8 @@
 		          t-att-data-epayco-amount="amount"
 		          t-att-data-epayco-name="reference"
 		          t-att-data-epayco-description="reference"
-		          t-att-data-epayco-invoice="reference"
+		          t-att-data-epayco-invoice="order"
+			  t-att-data-epayco-extra1="reference"
 		          t-att-data-epayco-currency="currency_code"
 		          t-att-data-epayco-country="country_code"
 		          t-att-data-epayco-external="epayco_checkout_external"
@@ -86,7 +88,8 @@
 		          t-att-data-epayco-tax-base="amount_untaxed"
 		          t-att-data-epayco-name="reference"
 		          t-att-data-epayco-description="reference"
-		          t-att-data-epayco-invoice="reference"
+		          t-att-data-epayco-invoice="order"
+		          t-att-data-epayco-extra1="reference"
 		          t-att-data-epayco-currency="currency_code"
 		          t-att-data-epayco-country="country_code"
 		          t-att-data-epayco-external="epayco_checkout_external"

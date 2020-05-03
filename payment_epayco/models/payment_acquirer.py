@@ -81,6 +81,10 @@ class PaymentAcquirer(models.Model):
         partner_vat = values.get('partner') and values['partner'].vat
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         epayco_tx_values = dict(values)
+        split_reference = epayco_tx_values.get('reference').split('-')
+        order = ''
+        if split_reference:
+            order = split_reference[0]
         epayco_tx_values.update({
             'currency_code': values.get('currency') and values[
                 'currency'].name.lower(),
@@ -96,5 +100,6 @@ class PaymentAcquirer(models.Model):
                 base_url, EpaycoController._response_url),
             'confirmation_url': urls.url_join(
                 base_url, EpaycoController._confirmation_url),
+            'order': order,
         })
         return epayco_tx_values
