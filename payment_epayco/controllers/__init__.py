@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright 2019 ePayco.co
-# - Manuel Marquez <buzondemam@gmail.com>
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import main

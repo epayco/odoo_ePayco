@@ -1,117 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- © 2019 ePayco.co
-     Manuel Marquez <buzondemam@gmail.com>
-     License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl-3). -->
 <odoo>
-  <data noupdate="1">
-
     <template id="epayco_form">
-      <div>
-	<input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
-	<input type="hidden" name="epayco_checkout_external" t-att-value="epayco_checkout_external"/>
-	<input type="hidden" name="currency_code" t-att-value="currency_code"/>
-	<input type="hidden" name="epayco_public_key" t-att-value="epayco_public_key"/>
-	<input type="hidden" name="amount" t-att-value="amount"/>
-	<input type="hidden" name="country_code" t-att-value="country_code"/>
-	<input type="hidden" name="epayco_env_test" t-att-value="epayco_env_test"/>
-	<input type="hidden" name="reference" t-att-value="reference"/>
-	<input type="hidden" name="order" t-att-value="order"/>
-	<input type="hidden" name="epayco_lang" t-att-value="epayco_lang"/>
-	<input type="hidden" name="response_url" t-att-value="response_url"/>
-	<input type="hidden" name="confirmation_url" t-att-value="confirmation_url"/>
-	<input type="hidden" name="billing_partner_email" t-att-value="billing_partner_email"/>
-	<input type="hidden" name="billing_partner_name" t-att-value="billing_partner_name"/>
-	<input type="hidden" name="billing_partner_address" t-att-value="billing_partner_address"/>
-	<input type="hidden" name="billing_partner_document_type" t-att-value="billing_partner_document_type"/>
-	<input type="hidden" name="billing_partner_phone" t-att-value="billing_partner_phone"/>
-	<input type="hidden" name="billing_partner_vat" t-att-value="billing_partner_vat"/>
-      </div>
+        <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
+        <input type="hidden" name="public_key" t-att-value='public_key' />
+        <input type="hidden" name="txnid" t-att-value='txnid' />
+        <input type="hidden" name="amount" t-att-value='amount' />
+        <input type="hidden" name="productinfo" t-att-value='productinfo' />
+        <input type="hidden" name="firstname" t-att-value='firstname' />
+        <input type="hidden" name="email" t-att-value='email' />
+        <input type="hidden" name="phone" t-att-value='phone'/>
+        <input type="hidden" name="currency_code" t-att-value='currency_code'/>
+        <input type="hidden" name="country_code" t-att-value='country_code'/>
+        <input type="hidden" name="epayco_checkout_external" t-att-value='epayco_checkout_external'/>
+        <input type="hidden" name="epayco_env_test" t-att-value='epayco_env_test'/>
+        <input type="hidden" name="epayco_lang" t-att-value='epayco_lang'/>
+        <input type="hidden" name="response_url" t-att-value='response_url'/>
+        <input type="hidden" name="url_confirmation" t-att-value='url_confirmation'/>
+        <input type="hidden" name="extra1" t-att-value='extra1'/>
+        <input type="hidden" name="extra2" t-att-value='extra2'/>
     </template>
-    
-  </data>
 
-  <data>
-
-    <template id="assets_frontend" inherit_id="website.assets_frontend">
-      <xpath expr="link[last()]" position="after">
-        <link rel="stylesheet" type="text/scss" href="/payment_epayco/static/src/css/payment_epayco.css" />
-      </xpath>
-    </template>
-    
     <template id="checkout">
       <t t-call="website.layout">
-	<div id="wrap">
-          <div class="oe_structure oe_empty">
-            <div class="container">
-	      <p style="margin-top: 10px;">Cargando medios de pago de ePayco...</p>
-	      <p>Si no se cargan automáticamente, de clic en el botón "Pagar con ePayco".</p>
-	      <div class="loader">
-		<span class="sr-only">Loading...</span>
-	      </div>
-
-	      <div id="form-button-container">
-		<form>
-		  <t t-if="(amount_untaxed + amount_tax) > float(amount)">
-		      <script
-		          src="https://checkout.epayco.co/checkout.js"
-		          class="epayco-button"
-		          data-epayco-autoclick="true"
-		          t-att-data-epayco-key="epayco_public_key"
-		          t-att-data-epayco-amount="amount"
-		          t-att-data-epayco-name="reference"
-		          t-att-data-epayco-description="reference"
-		          t-att-data-epayco-invoice="order"
-			  t-att-data-epayco-extra1="reference"
-		          t-att-data-epayco-currency="currency_code"
-		          t-att-data-epayco-country="country_code"
-		          t-att-data-epayco-external="epayco_checkout_external"
-		          t-att-data-epayco-test="epayco_env_test"
-		          t-att-data-epayco-lang="epayco_lang"
-		          t-att-data-epayco-email-billing="billing_partner_email"
-		          t-att-data-epayco-name-billing="billing_partner_name"
-		          t-att-data-epayco-address-billing="billing_partner_address"
-		          t-att-data-epayco-type-doc-billing="billing_partner_document_type"
-		          t-att-data-epayco-mobilephone-billing="billing_partner_phone"
-		          t-att-data-epayco-number-doc-billing="billing_partner_vat"
-		          t-att-data-epayco-response="response_url"
-			  t-att-data-epayco-confirmation="confirmation_url">
-		      </script>
-		  </t>
-		  <t t-else="">
-		      <script
-		          src="https://checkout.epayco.co/checkout.js"
-		          class="epayco-button"
-		          data-epayco-autoclick="true"
-		          t-att-data-epayco-key="epayco_public_key"
-		          t-att-data-epayco-amount="amount"
-		          t-att-data-epayco-tax="amount_tax"
-		          t-att-data-epayco-tax-base="amount_untaxed"
-		          t-att-data-epayco-name="reference"
-		          t-att-data-epayco-description="reference"
-		          t-att-data-epayco-invoice="order"
-		          t-att-data-epayco-extra1="reference"
-		          t-att-data-epayco-currency="currency_code"
-		          t-att-data-epayco-country="country_code"
-		          t-att-data-epayco-external="epayco_checkout_external"
-		          t-att-data-epayco-test="epayco_env_test"
-		          t-att-data-epayco-lang="epayco_lang"
-		          t-att-data-epayco-email-billing="billing_partner_email"
-		          t-att-data-epayco-name-billing="billing_partner_name"
-		          t-att-data-epayco-address-billing="billing_partner_address"
-		          t-att-data-epayco-type-doc-billing="billing_partner_document_type"
-		          t-att-data-epayco-mobilephone-billing="billing_partner_phone"
-		          t-att-data-epayco-number-doc-billing="billing_partner_vat"
-		          t-att-data-epayco-response="response_url"
-			  t-att-data-epayco-confirmation="confirmation_url">
-		      </script>
-		  </t>
-		</form>
-	      </div>
-	    </div>
-	  </div>
-	</div>
+        <div id="wrap">
+            <div class="oe_structure oe_empty">
+                <div class="container">
+                    <p style="margin-top: 10px;">Cargando medios de pago de ePayco...</p>
+                    <p>Si no se cargan automáticamente, de clic en el botón "Pagar con ePayco".</p>
+                    <div class="loader">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <div id="form-button-container">
+                        <form>
+                            <script
+                                src="https://checkout.epayco.co/checkout.js"
+                                class="epayco-button"
+                                t-att-data-epayco-key="public_key"
+                                t-att-data-epayco-amount="amount"
+                                t-att-data-epayco-tax="amount_tax"
+                                t-att-data-epayco-tax-base="amount_untaxed"
+                                t-att-data-epayco-name="txnid"
+                                t-att-data-epayco-description="txnid"
+                                t-att-data-epayco-invoice="txnid"
+                                t-att-data-epayco-extra1="extra1"
+                                t-att-data-epayco-extra3="currency_code"
+                                t-att-data-epayco-currency="currency_code"
+                                t-att-data-epayco-country="country_code"
+                                t-att-data-epayco-external="epayco_checkout_external"
+                                t-att-data-epayco-test="epayco_env_test"
+                                t-att-data-epayco-lang="epayco_lang"
+                                t-att-data-epayco-email-billing="email"
+                                t-att-data-epayco-name-billing="firstname"
+                                t-att-data-epayco-response="response_url"
+                                t-att-data-epayco-confirmation="url_confirmation"
+                                t-att-data-epayco-extra2="productinfo"
+                                >
+                            </script>
+                        </form>
+	                </div>
+                </div>
+            </div>
+        </div>
       </t>
     </template>
-
-  </data>
-</odoo>	
+</odoo>
