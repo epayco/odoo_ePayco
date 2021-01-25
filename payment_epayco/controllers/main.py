@@ -18,11 +18,15 @@ class EpaycoController(http.Controller):
     def epayco_return(self, **post):
         """ Epayco."""
         order = request.website.sale_get_order()
+        print(order)
+        print(type(order))
+        print('_____________________  _______________')
         post_data = {
             'amount_tax': order.amount_tax,
             'amount_untaxed': order.amount_untaxed,
         }
         post.update(post_data)
+        print(post)
         return request.render('payment_epayco.checkout', post)
 
 

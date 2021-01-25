@@ -4,6 +4,13 @@
 import hashlib
 import uuid
 
+# coding: utf-8
+
+import json
+import logging
+import uuid
+import dateutil.parser
+import pytz
 from werkzeug import urls
 
 from odoo import api, fields, models, _
@@ -18,8 +25,21 @@ _logger = logging.getLogger(__name__)
 
 class PaymentAcquirerEpayco(models.Model):
     _inherit = 'payment.acquirer'
-
     provider = fields.Selection(selection_add=[('epayco', 'Epayco')])
+
+from odoo.addons.payment_epayco.controllers.main import EpaycoController
+from odoo.tools.float_utils import float_compare
+
+
+_logger = logging.getLogger(__name__)
+
+
+class AcquirerEpayco(models.Model):
+    _inherit = 'payment.acquirer'
+
+    provider = fields.Selection(selection_add=[
+        ('epayco', 'Epayco')
+    ], ondelete={'epayco': 'set default'})
     epayco_p_cust_id = fields.Char(string='P_CUST_ID', required_if_provider='epayco', groups='base.group_user')
     epayco_p_key = fields.Char(string='P_KEY', required_if_provider='epayco', groups='base.group_user')
     epayco_public_key = fields.Char(string='PUBLICK_KEY', required_if_provider='epayco', groups='base.group_user')
@@ -29,6 +49,7 @@ class PaymentAcquirerEpayco(models.Model):
         required_if_provider='epayco',
         string='Checkout Type',
         default='onpage')
+
 
     def epayco_form_generate_values(self, values):
         self.ensure_one()
@@ -113,6 +134,11 @@ class PaymentTransactionEpayco(models.Model):
         signature = data.get('x_signature')
         if not reference or not reference or not signature:
             raise ValidationError(_('Epayco: received data with missing reference (%s) or signature (%s)') % (reference, signature))
+        reference = data.get('x_extra1')
+        signature = data.get('x_signature')
+        if not reference or not reference or not signature:
+            raise ValidationError(
+                _('Epayco: received data with missing reference (%s) or signature (%s)') % (reference, signature))
 
         transaction = self.search([('reference', '=', reference)])
 
@@ -123,25 +149,30 @@ class PaymentTransactionEpayco(models.Model):
             error_msg = (_('Epayco: received data for reference %s; multiple orders found') % (reference))
             raise ValidationError(error_msg)
 
-        #verify signature
+        # verify signature
         reference = data.get('x_extra1')
         signature = data.get('x_signature')
         shasign_check = transaction.acquirer_id._epayco_generate_sign(data)
         if shasign_check != signature:
             raise ValidationError(_('Epayco: invalid signature, received %s, computed %s, for data %s') % (signature, shasign_check, data))
+            raise ValidationError(_('Epayco: invalid signature, received %s, computed %s, for data %s') % (
+            signature, shasign_check, data))
         return transaction
 
     def _epayco_form_get_invalid_parameters(self, data):
         invalid_parameters = []
-
         if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
             invalid_parameters.append(
                 ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
         #check what is buyed
-        if int(self.acquirer_id.epayco_merchant_id) != int(data.get         ('x_cust_id_cliente')):
+        if int(self.acquirer_id.epayco_merchant_id) != int(data.get('x_cust_id_cliente')):
+        if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
+            invalid_parameters.append(
+                ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
+            # check what is buyed
+        if int(self.acquirer_id.epayco_merchant_id) != int(data.get('x_cust_id_cliente')):
             invalid_parameters.append(
                 ('Customer ID', data.get('x_cust_id_cliente'), self.acquirer_id.epayco_merchant_id))
-
         return invalid_parameters
 
     def _epayco_form_validate(self, data):
