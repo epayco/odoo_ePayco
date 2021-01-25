@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import hashlib
+import uuid
+
 # coding: utf-8
 
 import json
@@ -9,6 +15,18 @@ from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.addons.payment.models.payment_acquirer import ValidationError
+from odoo.tools.float_utils import float_compare
+
+
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
+class PaymentAcquirerEpayco(models.Model):
+    _inherit = 'payment.acquirer'
+    provider = fields.Selection(selection_add=[('epayco', 'Epayco')])
+
 from odoo.addons.payment_epayco.controllers.main import EpaycoController
 from odoo.tools.float_utils import float_compare
 
@@ -77,11 +95,45 @@ class AcquirerEpayco(models.Model):
         return '/payment/epayco/checkout/'
 
 
+    def _epayco_generate_sign(self, values):
+        """ Generate the shasign for incoming or outgoing communications.
+        :param self: the self browse record. It should have a shakey in shakey out
+        :param string inout: 'in' (odoo contacting epayco) or 'out' (epayco
+                             contacting odoo).
+        :param dict values: transaction values
+
+        :return string: shasign
+        """
+        self.ensure_one()
+        p_cust_id_client = self.epayco_merchant_id
+        p_key = self.epayco_p_key
+        x_ref_payco = values.get('x_ref_payco')
+        x_transaction_id = values.get('x_transaction_id')
+        x_amount = values.get('x_amount')
+        x_currency_code = values.get('x_currency_code')
+        hash_str_bytes = bytes('%s^%s^%s^%s^%s^%s' % (
+            self.p_cust_id_cliente,
+            p_key,
+            x_ref_payco,
+            x_transaction_id,
+            x_amount,
+            x_currency_code), 'utf-8')
+        hash_object = hashlib.sha256(hash_str_bytes)
+        hash = hash_object.hexdigest()
+        return hash
+
+
 class PaymentTransactionEpayco(models.Model):
     _inherit = 'payment.transaction'
 
     @api.model
     def _epayco_form_get_tx_from_data(self, data):
+        """ Given a data dict coming from epayco, verify it and find the related
+        transaction record. """
+        reference = data.get('x_extra1')
+        signature = data.get('x_signature')
+        if not reference or not reference or not signature:
+            raise ValidationError(_('Epayco: received data with missing reference (%s) or signature (%s)') % (reference, signature))
         reference = data.get('x_extra1')
         signature = data.get('x_signature')
         if not reference or not reference or not signature:
@@ -102,6 +154,7 @@ class PaymentTransactionEpayco(models.Model):
         signature = data.get('x_signature')
         shasign_check = transaction.acquirer_id._epayco_generate_sign(data)
         if shasign_check != signature:
+            raise ValidationError(_('Epayco: invalid signature, received %s, computed %s, for data %s') % (signature, shasign_check, data))
             raise ValidationError(_('Epayco: invalid signature, received %s, computed %s, for data %s') % (
             signature, shasign_check, data))
         return transaction
@@ -111,11 +164,15 @@ class PaymentTransactionEpayco(models.Model):
         if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
             invalid_parameters.append(
                 ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
+        #check what is buyed
+        if int(self.acquirer_id.epayco_merchant_id) != int(data.get('x_cust_id_cliente')):
+        if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
+            invalid_parameters.append(
+                ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
             # check what is buyed
         if int(self.acquirer_id.epayco_merchant_id) != int(data.get('x_cust_id_cliente')):
             invalid_parameters.append(
                 ('Customer ID', data.get('x_cust_id_cliente'), self.acquirer_id.epayco_merchant_id))
-
         return invalid_parameters
 
     def _epayco_form_validate(self, data):
