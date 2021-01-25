@@ -1,1 +1,0 @@
-Epayco Payment Acquirer.
