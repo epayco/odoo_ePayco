@@ -5,6 +5,7 @@ import logging
 import pprint
 import requests
 import werkzeug
+import sys
 
 from odoo import http
 from odoo.http import request, Response
@@ -36,7 +37,8 @@ class EpaycoController(http.Controller):
         type='http',
         csrf=False,
         website=True,
-        auth='public')
+        auth='public'
+        )
     def epayco_payment_confirmation_url(self, **post):
         """Process payment confirmation from ePayco."""
         return self._epayco_process_response(post, confirmation=True)
