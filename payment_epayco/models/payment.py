@@ -179,9 +179,8 @@ class PaymentTransactionPayco(models.Model):
                         validation = True
                     else:
                         validation = False
-        print("==== _payco_form_validate =====", shasign_check, validation)
+
         massage = ""
-        print(tx.state)
         if shasign_check == True and validation == True:
             if tx.state not in ['draft']:
                 if cod_response not in [1,3]:
@@ -199,19 +198,7 @@ class PaymentTransactionPayco(models.Model):
                         'date': fields.Datetime.now(),
                         'state_message': massage,
                     })
-                    self._set_transaction_cancel()
-                    self.env.cr.execute(
-                        "SELECT id, name, state FROM sale_order WHERE name=%s", 
-                        (data.get('x_extra1'),))
-                    result = self.env.cr.fetchone()
-                    row_id = result[0]
-                    row_name = result[1]
-                    model_name = 'sale_order'
-                    params = {'state': 'draft'}
-                    condition = self.reflect_params(row_id,row_name)
-                    self.query_update_status(model_name, params, condition)
-                    self._set_transaction_cancel()
-                    self.query_update_status(model_name, {'state': 'cancel'}, condition)
+                    self.cancel_transaction(data.get('x_extra1'))
                 else:
                     if tx.state in ['pending']:
                         if cod_response == 1:
@@ -223,9 +210,13 @@ class PaymentTransactionPayco(models.Model):
                 elif cod_response == 3:
                     self._set_transaction_pending()
                 else:
-                    self._set_transaction_cancel()          
+                    self._set_transaction_cancel()
+                    self.cancel_transaction(data.get('x_extra1'))          
         else:
-            self._set_transaction_error()   
+            self._set_transaction_cancel()
+            self.cancel_transaction(data.get('x_extra1'))            
+        #for tx in tx_already_processed:
+        #_logger.info('Trying to write the same state twice on tx (ref: %s, state: %s' % (tx.reference, tx.state))    
         return result
 
     def query_update_status(self, table, values, selectors):
@@ -244,9 +235,21 @@ class PaymentTransactionPayco(models.Model):
         self.env.cr.execute(query,values)
         self.env.cr.fetchall()
              
-    def reflect_params(self,id,name):
+    def reflect_params(self, id , name):
         """ Return the values to write to the database. """
-        return {
-            'id': id,
-            'name': name
-        }    
+        return {'name': name}
+        
+
+    def cancel_transaction(self,order_name):
+        self.env.cr.execute(
+            "SELECT id, name, state FROM sale_order WHERE name=%s", 
+            (order_name,))
+        result = self.env.cr.fetchone()
+        row_id = result[0]
+        row_name = result[1]
+        model_name = 'sale_order'
+        params = {'state': 'draft'}
+        condition = self.reflect_params(row_id,row_name)
+        self.query_update_status(model_name, params, condition)
+        self._set_transaction_cancel()
+        self.query_update_status(model_name, {'state': 'cancel'}, condition)
