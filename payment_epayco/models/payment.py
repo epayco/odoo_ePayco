@@ -85,10 +85,10 @@ class PaymentAcquirerPayco(models.Model):
         amount= 0.0
         tax = 0.0
         base_tax = 0.0
-        if values['amount'] == values['partner'].last_website_so_id.amount_total:
+        if float_compare(float(values['amount']), values['partner'].last_website_so_id.amount_total, 2) == 0:
             tax = values['partner'].last_website_so_id.amount_tax
             base_tax = values['partner'].last_website_so_id.amount_undiscounted
-            amount = values['amount']
+            amount = values['partner'].last_website_so_id.amount_total
         if split_reference:
             order = split_reference[0]
         payco_tx_values.update({
@@ -198,7 +198,7 @@ class PaymentTransactionPayco(models.Model):
                         'date': fields.Datetime.now(),
                         'state_message': massage,
                     })
-                    self.cancel_transaction(data.get('x_extra1'))
+                    self.manage_status_order(data.get('x_extra1'),'sale_order')
                 else:
                     if tx.state in ['pending']:
                         if cod_response == 1:
@@ -210,13 +210,13 @@ class PaymentTransactionPayco(models.Model):
                 elif cod_response == 3:
                     self._set_transaction_pending()
                 else:
-                    self._set_transaction_cancel()
-                    self.cancel_transaction(data.get('x_extra1'))          
+                    self.manage_status_order(data.get('x_extra1'),'sale_order')          
         else:
-            self._set_transaction_cancel()
-            self.cancel_transaction(data.get('x_extra1'))            
-        #for tx in tx_already_processed:
-        #_logger.info('Trying to write the same state twice on tx (ref: %s, state: %s' % (tx.reference, tx.state))    
+            if tx.state in ['done']:
+                self.manage_status_order(data.get('x_extra1'),'stock_move', confirmation=True)
+
+            self.manage_status_order(data.get('x_extra1'),'sale_order')            
+
         return result
 
     def query_update_status(self, table, values, selectors):
@@ -235,21 +235,16 @@ class PaymentTransactionPayco(models.Model):
         self.env.cr.execute(query,values)
         self.env.cr.fetchall()
              
-    def reflect_params(self, id , name):
+    def reflect_params(self, name, confirmation=False):
         """ Return the values to write to the database. """
-        return {'name': name}
-        
+        if not confirmation:
+            return {'name': name}
+        else:
+            return {'origin': name}
 
-    def cancel_transaction(self,order_name):
-        self.env.cr.execute(
-            "SELECT id, name, state FROM sale_order WHERE name=%s", 
-            (order_name,))
-        result = self.env.cr.fetchone()
-        row_id = result[0]
-        row_name = result[1]
-        model_name = 'sale_order'
+    def manage_status_order(self,order_name, model_name, confirmation=False):
+        condition = self.reflect_params(order_name , confirmation)
         params = {'state': 'draft'}
-        condition = self.reflect_params(row_id,row_name)
         self.query_update_status(model_name, params, condition)
         self._set_transaction_cancel()
         self.query_update_status(model_name, {'state': 'cancel'}, condition)
