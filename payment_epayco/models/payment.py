@@ -43,12 +43,18 @@ class PaymentAcquirerEpayco(models.Model):
         epayco_tx_values = dict(values)
         split_reference = epayco_tx_values.get('reference').split('-')
         order = ''
+        order = ''
+        tax = values['partner'].last_website_so_id.amount_tax
+        base_tax = values['partner'].last_website_so_id.amount_undiscounted
+        amount = values['partner'].last_website_so_id.amount_total
         if split_reference:
             order = split_reference[0]
         epayco_tx_values.update({
             'public_key': self.epayco_public_key,
             'txnid': order,
-            'amount': values['amount'],
+            'amount': amount,
+            'tax': tax,
+            'base_tax': base_tax,
             'productinfo': tx.reference,
             'firstname': values.get('partner_name'),
             'email': values.get('partner_email'),
@@ -116,25 +122,12 @@ class PaymentTransactionEpayco(models.Model):
             raise ValidationError(error_msg)
         elif len(transaction) > 1:
             error_msg = (_('Epayco: received data for reference %s; multiple orders found') % (reference))
-            raise ValidationError(error_msg)
+            raise ValidationError(error_msg)        
 
-        # verify signature
-        reference = data.get('x_extra1')
-        signature = data.get('x_signature')
-        shasign_check = transaction.acquirer_id._epayco_generate_sign(data)
-        if shasign_check != signature:
-            raise ValidationError(_('Epayco: invalid signature, received %s, computed %s, for data %s') % (signature, shasign_check, data))
         return transaction
 
     def _epayco_form_get_invalid_parameters(self, data):
         invalid_parameters = []
-        if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
-            invalid_parameters.append(
-                ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
-        #check what is buyed
-        if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
-            invalid_parameters.append(
-                ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
             # check what is buyed
         if int(self.acquirer_id.epayco_p_cust_id) != int(data.get('x_cust_id_cliente')):
             invalid_parameters.append(
@@ -142,15 +135,105 @@ class PaymentTransactionEpayco(models.Model):
         return invalid_parameters
 
     def _epayco_form_validate(self, data):
-        status = data.get('x_transaction_state')
+        cod_response = int(data.get('x_cod_response'))
         result = self.write({
             'acquirer_reference': data.get('x_ref_payco'),
             'date': fields.Datetime.now(),
         })
-        if status == 'Aceptada':
-            self._set_transaction_done()
-        elif status == 'Pendiente':
-            self._set_transaction_pending()
+        # verify signature
+        reference = data.get('x_extra2')
+        signature = data.get('x_signature')
+        shasign_check = self.acquirer_id._epayco_generate_sign(data)
+        tx = self.env['payment.transaction'].search([('reference', '=', reference)])
+        x_test_request = data.get('x_test_request')
+        isTestPluginMode = 'yes' if data.get('x_extra1') == 'true' else 'no'
+        x_approval_code = data.get('x_approval_code')
+        x_cod_transaction_state = data.get('x_cod_transaction_state')
+        isTestTransaction = 'yes' if x_test_request == 'TRUE' else 'no'
+        isTestMode = 'true' if isTestTransaction == 'yes' else 'false'
+        validation = False
+        if float_compare(float(data.get('x_amount', '0.0')), tx.amount, 2) == 0:
+            if isTestPluginMode == "yes":
+                validation = True
+            if isTestPluginMode == "no":
+                if x_approval_code != "000000" and int(x_cod_transaction_state) == 1:
+                    validation = True
+                else:
+                    if int(x_cod_transaction_state) != 1:
+                        validation = True
+                    else:
+                        validation = False
+
+        massage = ""
+        if signature == shasign_check and validation == True:
+            if tx.state not in ['draft']:
+                if cod_response not in [1,3]:
+                    allowed_states = ('draft', 'authorized', 'pending')
+                    target_state = 'cancel'
+                    (tx_to_process, tx_already_processed, tx_wrong_state) = self._filter_transaction_state(allowed_states, target_state)
+                    massage = "second confirm ePayco"
+                    tx_to_process.write({
+                        'state': target_state,
+                        'date': fields.Datetime.now(),
+                        'state_message': massage,
+                    })
+                    self.manage_status_order(data.get('x_description'),'sale_order')
+                else:
+                    if tx.state in ['pending']:
+                        if cod_response == 1:
+                            self._set_transaction_done()    
+            else:
+                if cod_response == 1:
+                    self._set_transaction_done()
+                elif cod_response == 3:
+                    self._set_transaction_pending()
+                else:
+                    self.manage_status_order(data.get('x_description'),'sale_order')
         else:
-            self._set_transaction_cancel()
+            if tx.state in ['done']:
+                allowed_states = ('draft', 'authorized', 'pending','done')
+                target_state = 'cancel'
+                (tx_to_process, tx_already_processed, tx_wrong_state) = self._filter_transaction_state(allowed_states, target_state)
+                massage = "second confirm ePayco"
+                tx_to_process.write({
+                    'state': target_state,
+                    'date': fields.Datetime.now(),
+                    'state_message': massage,
+                })
+                self.manage_status_order(data.get('x_description'),'stock_picking', confirmation=True)
+                self.manage_status_order(data.get('x_description'),'sale_order')
+                self.manage_status_order(data.get('x_description'),'stock_move', confirmation=True)
+            else: 
+                self.manage_status_order(data.get('x_description'),'sale_order')
+
         return result
+
+    def query_update_status(self, table, values, selectors):
+        """ Update the table with the given values (dict), and use the columns in
+            ``selectors`` to select the rows to update.
+        """
+        UPDATE_QUERY = "UPDATE {table} SET {assignment} WHERE {condition} RETURNING id"
+        setters = set(values) - set(selectors)    
+        assignment=",".join("{0}='{1}'".format(s,values[s]) for s in setters)
+        condition=" AND ".join("{0}='{1}'".format(s,selectors[s]) for s in selectors)
+        query = UPDATE_QUERY.format(
+            table=table,
+            assignment=assignment,
+            condition=condition,
+        )
+        self.env.cr.execute(query,values)
+        self.env.cr.fetchall()
+
+    def reflect_params(self, name, confirmation=False):
+        """ Return the values to write to the database. """
+        if not confirmation:
+            return {'name': name}
+        else:
+            return {'origin': name}
+
+    def manage_status_order(self,order_name, model_name, confirmation=False):
+        condition = self.reflect_params(order_name , confirmation)
+        params = {'state': 'draft'}
+        self.query_update_status(model_name, params, condition)
+        self.query_update_status(model_name, {'state': 'cancel'}, condition)
+        self._set_transaction_cancel()

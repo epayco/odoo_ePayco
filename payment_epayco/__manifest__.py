@@ -8,8 +8,7 @@
     'category': 'Accounting/Payment',
     'summary': 'Payment Acquirer: Epayco Implementation',
     'description': """
-    Epayco Payment Acquirer for India.
-    Epayco payment gateway supports only INR currency.
+    Epayco Payment Acquirer.
     """,
     'depends': ['payment'],
     'data': [
