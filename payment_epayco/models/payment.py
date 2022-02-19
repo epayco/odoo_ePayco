@@ -8,7 +8,6 @@ import hashlib
 from re import S
 import uuid
 from werkzeug import urls
-import sys
 
 from odoo import api, fields, models, _
 from odoo.addons.payment.models.payment_acquirer import ValidationError
@@ -167,6 +166,7 @@ class PaymentTransactionPayco(models.Model):
         x_cod_transaction_state = data.get('x_cod_transaction_state')
         isTestTransaction = 'yes' if x_test_request == 'TRUE' else 'no'
         isTestMode = 'true' if isTestTransaction == 'yes' else 'false'
+
         validation = False
         if float_compare(float(data.get('x_amount', '0.0')), tx.amount, 2) == 0:
             if isTestPluginMode == "yes":
@@ -213,10 +213,26 @@ class PaymentTransactionPayco(models.Model):
                     self.manage_status_order(data.get('x_extra1'),'sale_order')          
         else:
             if tx.state in ['done']:
+                allowed_states = ('draft', 'authorized', 'pending','done')
+                target_state = 'draft'
+                (tx_to_process, tx_already_processed, tx_wrong_state) = self._filter_transaction_state(allowed_states, target_state)
+                massage = "second confirm ePayco"
+                tx_to_process.write({
+                    'state': target_state,
+                    'date': fields.Datetime.now(),
+                    'state_message': massage,
+                })
+                tx_to_process.write({
+                    'state': 'cancel',
+                    'date': fields.Datetime.now(),
+                    'state_message': massage,
+                })
+                self.manage_status_order(data.get('x_extra1'),'stock_picking', confirmation=True)
+                self.manage_status_order(data.get('x_extra1'),'sale_order')
                 self.manage_status_order(data.get('x_extra1'),'stock_move', confirmation=True)
-
-            self.manage_status_order(data.get('x_extra1'),'sale_order')            
-
+            else:
+                self.manage_status_order(data.get('x_extra1'),'sale_order')
+   
         return result
 
     def query_update_status(self, table, values, selectors):
@@ -234,7 +250,7 @@ class PaymentTransactionPayco(models.Model):
         )
         self.env.cr.execute(query,values)
         self.env.cr.fetchall()
-             
+
     def reflect_params(self, name, confirmation=False):
         """ Return the values to write to the database. """
         if not confirmation:
@@ -246,5 +262,5 @@ class PaymentTransactionPayco(models.Model):
         condition = self.reflect_params(order_name , confirmation)
         params = {'state': 'draft'}
         self.query_update_status(model_name, params, condition)
-        self._set_transaction_cancel()
         self.query_update_status(model_name, {'state': 'cancel'}, condition)
+        self._set_transaction_cancel()
