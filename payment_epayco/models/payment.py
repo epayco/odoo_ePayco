@@ -81,13 +81,9 @@ class PaymentAcquirerPayco(models.Model):
         payco_tx_values = dict(values)
         split_reference = payco_tx_values.get('reference').split('-')
         order = ''
-        amount= 0.0
-        tax = 0.0
-        base_tax = 0.0
-        if float_compare(float(values['amount']), values['partner'].last_website_so_id.amount_total, 2) == 0:
-            tax = values['partner'].last_website_so_id.amount_tax
-            base_tax = values['partner'].last_website_so_id.amount_undiscounted
-            amount = values['partner'].last_website_so_id.amount_total
+        tax = values['partner'].last_website_so_id.amount_tax
+        base_tax = values['partner'].last_website_so_id.amount_undiscounted
+        amount = values['partner'].last_website_so_id.amount_total
         if split_reference:
             order = split_reference[0]
         payco_tx_values.update({
