@@ -36,7 +36,7 @@
                             <div id="form-button-container">
                                 <form>
                                     <script
-                                        src="https://checkout.epayco.co/checkout.js"
+                                        src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js?version=1643645084821"
                                         class="epayco-button"
                                         t-att-data-epayco-key="public_key"
                                         t-att-data-epayco-amount="amount"
@@ -44,10 +44,11 @@
                                         t-att-data-epayco-tax-base="base_tax"
                                         t-att-data-epayco-name="txnid"
                                         t-att-data-epayco-description="txnid"
-                                        t-att-data-epayco-invoice="txnid"
+                                        t-att-data-epayco-invoice="extra1"
                                         t-att-data-epayco-extra1="extra1"
                                         t-att-data-epayco-extra2="productinfo"
                                         t-att-data-epayco-extra3="extra2"
+                                        t-att-data-epayco-extra4="epayco_env_test"
                                         t-att-data-epayco-currency="currency_code"
                                         t-att-data-epayco-country="country_code"
                                         t-att-data-epayco-external="epayco_checkout_external"
@@ -58,7 +59,7 @@
                                         t-att-data-epayco-response="response_url"
                                         t-att-data-epayco-confirmation="url_confirmation"
                                         data-epayco-button="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png"
-                                        data-epayco-autoclick="true"
+                                        data-epayco-autoclick="false"
                                         >
                                     </script>
                                     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

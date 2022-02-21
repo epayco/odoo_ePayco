@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from builtins import print
 import hashlib
 
 import hashlib
+from re import S
 import uuid
 from werkzeug import urls
 
@@ -79,13 +81,9 @@ class PaymentAcquirerPayco(models.Model):
         payco_tx_values = dict(values)
         split_reference = payco_tx_values.get('reference').split('-')
         order = ''
-        amount= 0.0
-        tax = 0.0
-        base_tax = 0.0
-        if values['amount'] == values['partner'].last_website_so_id.amount_total:
-            tax = values['partner'].last_website_so_id.amount_tax
-            base_tax = values['partner'].last_website_so_id.amount_undiscounted
-            amount = values['amount']
+        tax = values['partner'].last_website_so_id.amount_tax
+        base_tax = values['partner'].last_website_so_id.amount_undiscounted
+        amount = values['partner'].last_website_so_id.amount_total
         if split_reference:
             order = split_reference[0]
         payco_tx_values.update({
@@ -107,7 +105,7 @@ class PaymentAcquirerPayco(models.Model):
             'url_confirmation': url_confirmation,
             'extra1': order,
             'extra2': values['reference'],
-            'extra3': "oDoo 12"
+            'extra3': test
         })
         return payco_tx_values
 
@@ -121,16 +119,16 @@ class PaymentTransactionPayco(models.Model):
 
     @api.model
     def _payco_form_get_tx_from_data(self, data):
-        """ Given a data dict coming from Payco, verify it and find the related
+        """ Given a data dict coming from ePayco, verify it and find the related
         transaction record. """
         reference = data.get('x_extra1')
         pay_id = data.get('x_extra2')
         signature = data.get('x_signature')
+
         if not reference or not pay_id or not signature:
-            raise ValidationError(_('Payco: received data with missing reference (%s) or pay_id (%s) or shashign (%s)') % (reference, pay_id, signature))
+            raise ValidationError(_('ePayco: received data with missing reference (%s) or pay_id (%s) or shashign (%s)') % (reference, pay_id, signature))
 
         transaction = self.search([('reference', '=', pay_id)])
-
         if not transaction:
             error_msg = (_('Payco: received data for reference %s; no order found') % (reference))
             raise ValidationError(error_msg)
@@ -138,25 +136,14 @@ class PaymentTransactionPayco(models.Model):
             error_msg = (_('Payco: received data for reference %s; multiple orders found') % (reference))
             raise ValidationError(error_msg)
 
-        #verify shasign
-        shasign_check = transaction.acquirer_id._payco_generate_sign(signature, data)
-        if shasign_check == False:
-            raise ValidationError(_('Payco: invalid shasign, received %s, computed %s, for data %s') % (signature, shasign_check, data))
         return transaction
 
     def _payco_form_get_invalid_parameters(self, data):
         invalid_parameters = []
-        if self.acquirer_reference and data.get('x_transaction_id') != self.acquirer_reference:
-            invalid_parameters.append(
-                ('Transaction Id', data.get('x_transaction_id'), self.acquirer_reference))
         #check what is buyed
         if int(self.acquirer_id.payco_merchant_key) != int(data.get('x_cust_id_cliente')):
             invalid_parameters.append(
-                ('Custore_id', data.get('x_transaction_id'), self.acquirer_id.payco_merchant_key))
-
-        if float_compare(float(data.get('x_amount', '0.0')), self.amount, 2) != 0:
-            invalid_parameters.append(
-                ('Amount', data.get('x_amount'), '%.2f' % self.amount))
+                ('Custore_id', data.get('x_cust_id_cliente'), self.acquirer_id.payco_merchant_key))
 
         return invalid_parameters
 
@@ -166,11 +153,110 @@ class PaymentTransactionPayco(models.Model):
             'acquirer_reference': data.get('x_ref_payco'),
             'date': fields.Datetime.now(),
         })
-        if cod_response == 1:
-            self._set_transaction_done()
-        elif cod_response == 3:
-            self._set_transaction_pending()
+        signature = data.get('x_signature')
+        tx = self.env['payment.transaction'].search([('reference', '=', data.get('x_extra2'))])
+        shasign_check = self.acquirer_id._payco_generate_sign(signature, data)
+        x_test_request = data.get('x_test_request')
+        isTestPluginMode = 'yes' if data.get('x_extra4') == 'true' else 'no'
+        x_approval_code = data.get('x_approval_code')
+        x_cod_transaction_state = data.get('x_cod_transaction_state')
+        isTestTransaction = 'yes' if x_test_request == 'TRUE' else 'no'
+        isTestMode = 'true' if isTestTransaction == 'yes' else 'false'
+
+        validation = False
+        if float_compare(float(data.get('x_amount', '0.0')), tx.amount, 2) == 0:
+            if isTestPluginMode == "yes":
+                validation = True
+            if isTestPluginMode == "no":
+                if x_approval_code != "000000" and int(x_cod_transaction_state) == 1:
+                    validation = True
+                else:
+                    if int(x_cod_transaction_state) != 1:
+                        validation = True
+                    else:
+                        validation = False
+
+        massage = ""
+        if shasign_check == True and validation == True:
+            if tx.state not in ['draft']:
+                if cod_response not in [1,3]:
+                    allowed_states = ('draft', 'authorized', 'pending')
+                    target_state = 'draft'
+                    (tx_to_process, tx_already_processed, tx_wrong_state) = self._filter_transaction_state(allowed_states, target_state)
+                    massage = "second confirm ePayco"
+                    tx_to_process.write({
+                        'state': target_state,
+                        'date': fields.Datetime.now(),
+                        'state_message': massage,
+                    })
+                    tx_to_process.write({
+                        'state': 'cancel',
+                        'date': fields.Datetime.now(),
+                        'state_message': massage,
+                    })
+                    self.manage_status_order(data.get('x_extra1'),'sale_order')
+                else:
+                    if tx.state in ['pending']:
+                        if cod_response == 1:
+                            self._set_transaction_done()
+
+            else:
+                if cod_response == 1:
+                    self._set_transaction_done()
+                elif cod_response == 3:
+                    self._set_transaction_pending()
+                else:
+                    self.manage_status_order(data.get('x_extra1'),'sale_order')          
         else:
-            self._set_transaction_cancel()
+            if tx.state in ['done']:
+                allowed_states = ('draft', 'authorized', 'pending','done')
+                target_state = 'draft'
+                (tx_to_process, tx_already_processed, tx_wrong_state) = self._filter_transaction_state(allowed_states, target_state)
+                massage = "second confirm ePayco"
+                tx_to_process.write({
+                    'state': target_state,
+                    'date': fields.Datetime.now(),
+                    'state_message': massage,
+                })
+                tx_to_process.write({
+                    'state': 'cancel',
+                    'date': fields.Datetime.now(),
+                    'state_message': massage,
+                })
+                self.manage_status_order(data.get('x_extra1'),'stock_picking', confirmation=True)
+                self.manage_status_order(data.get('x_extra1'),'sale_order')
+                self.manage_status_order(data.get('x_extra1'),'stock_move', confirmation=True)
+            else:
+                self.manage_status_order(data.get('x_extra1'),'sale_order')
+   
         return result
-       
+
+    def query_update_status(self, table, values, selectors):
+        """ Update the table with the given values (dict), and use the columns in
+            ``selectors`` to select the rows to update.
+        """
+        UPDATE_QUERY = "UPDATE {table} SET {assignment} WHERE {condition} RETURNING id"
+        setters = set(values) - set(selectors)    
+        assignment=",".join("{0}='{1}'".format(s,values[s]) for s in setters)
+        condition=" AND ".join("{0}='{1}'".format(s,selectors[s]) for s in selectors)
+        query = UPDATE_QUERY.format(
+            table=table,
+            assignment=assignment,
+            condition=condition,
+        )
+        self.env.cr.execute(query,values)
+        self.env.cr.fetchall()
+
+    def reflect_params(self, name, confirmation=False):
+        """ Return the values to write to the database. """
+        if not confirmation:
+            return {'name': name}
+        else:
+            return {'origin': name}
+
+    def manage_status_order(self,order_name, model_name, confirmation=False):
+        condition = self.reflect_params(order_name , confirmation)
+        params = {'state': 'draft'}
+        self.query_update_status(model_name, params, condition)
+        self.query_update_status(model_name, {'state': 'cancel'}, condition)
+        self._set_transaction_cancel()

@@ -2,9 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Payco Payment Acquirer',
+    'name': 'ePayco Payment Acquirer',
     'category': 'Payment Acquirer',
-    'summary': 'Payment Acquirer: Payco Implementation',
+    'summary': 'Payment Acquirer: ePayco Implementation',
     'description': """ePayco payment gateway.""",
     'depends': ['payment'],
     'data': [
