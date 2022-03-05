@@ -14,7 +14,6 @@ from werkzeug import urls
 
 _logger = logging.getLogger(__name__)
 
-
 class EpaycoController(http.Controller):
     @http.route(['/payment/epayco/checkout'], type='http', website=True, csrf=False)
     def epayco_return(self, **post):
