@@ -43,7 +43,6 @@ class PaymentAcquirerEpayco(models.Model):
         epayco_tx_values = dict(values)
         split_reference = epayco_tx_values.get('reference').split('-')
         order = ''
-        order = ''
         tax = values['partner'].last_website_so_id.amount_tax
         base_tax = values['partner'].last_website_so_id.amount_undiscounted
         amount = values['partner'].last_website_so_id.amount_total
