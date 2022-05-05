@@ -5,6 +5,7 @@ import logging
 import pprint
 import requests
 import werkzeug
+import sys
 
 from odoo import http
 from odoo.http import request, Response
@@ -18,15 +19,11 @@ class EpaycoController(http.Controller):
     def epayco_return(self, **post):
         """ Epayco."""
         order = request.website.sale_get_order()
-        print(order)
-        print(type(order))
-        print('_____________________  _______________')
         post_data = {
             'amount_tax': order.amount_tax,
             'amount_untaxed': order.amount_untaxed,
         }
         post.update(post_data)
-        print(post)
         return request.render('payment_epayco.checkout', post)
 
 
@@ -40,7 +37,8 @@ class EpaycoController(http.Controller):
         type='http',
         csrf=False,
         website=True,
-        auth='public')
+        auth='public'
+        )
     def epayco_payment_confirmation_url(self, **post):
         """Process payment confirmation from ePayco."""
         return self._epayco_process_response(post, confirmation=True)
@@ -48,8 +46,6 @@ class EpaycoController(http.Controller):
     def _epayco_process_response(self, data, confirmation=False):
         if not confirmation:
             ref_payco = data.get('ref_payco')
-            print('ref_payco')
-            print(ref_payco)
             if ref_payco is None:
                 _logger.debug('User error in ePayco checkout: %s', data)
                 return werkzeug.utils.redirect('/shop/payment')
@@ -77,7 +73,7 @@ class EpaycoController(http.Controller):
     def _post_process_tx(self, data):
         """Post process transaction to confirm the sale order and
         to generate the invoices if needed."""
-        tx_reference = data.get('x_id_invoice')
+        tx_reference = data.get('x_extra2')
         payment_transaction = request.env['payment.transaction'].sudo()
 
         tx = payment_transaction.search([('reference', '=', tx_reference)])
