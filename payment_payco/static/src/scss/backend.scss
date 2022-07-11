@@ -1,0 +1,6 @@
+#payco-checkout > button{
+	display: none;
+}
+#payco-checkout > button:first-child{
+	display: block;
+}
