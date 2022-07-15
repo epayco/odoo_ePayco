@@ -43,16 +43,10 @@ Configuration
 * Ir al método de pago ePayco y presionar el botón "Activar".
 * En la tab de "Credenciales" colocar los datos correspondientes a los campos P_CUST_ID_CLIENTE, P_KEY y PUBLIC_KEY, los cuales los puede conseguir en su dashboard de ePayco en el menú de Integraciones / Llaves API en la seccion "LLaves secretas".
 
-* Estados de transacción: Por defecto el modulo hace una asociación entre los distintos estados de transacciones de ePayco y los estados de transacciones de Odoo. Revisar si este mapeo inicial se adapta a su lógica de negocio debido a que dependiendo del estado de la transacción Odoo manejara el flujo del pedido de venta, para mas detalle consultar: https://www.odoo.com/documentation/user/12.0/ecommerce/shopper_experience/payment_acquirer.html. Para mas detalles sobre los códigos de estados de transacción de ePayco mirar la tabla "Códigos de respuesta" en el siguiente link https://docs.epayco.co/payments/checkout.
-
 * Para hacer el método de pago disponible en el ecommerce, pulsar el botón Publicar.
   
 * Si ya ha probado el modulo y esta conforme puede cambiar el ambiente a producción.
 
-*Tomar en cuenta que en su dashboard de ePayco debe configurar las urls de respuesta y confirmación en el menú Integraciones en la sección "Opciones pasarela". El modulo genera automáticamente estas urls:*
-
-* URL de respuesta: <base_url>/payment/epayco/response/
-* URL de confirmacion: <base_url>/payment/epayco/confirmation/
 
 Bug Tracker
 ===========
@@ -75,22 +69,5 @@ Authors
 Contributors
 ~~~~~~~~~~~~
 
-* Ricardo Saldarriaga <ricardo.saldarriaga@payco.co>
+* Ricardo Saldarriaga <ricardo.saldarriaga@epayco.com>
 
-Other credits
-~~~~~~~~~~~~~
-
-Maintainers
-~~~~~~~~~~~
-
-.. |maintainer-mamcode| image:: https://github.com/mamcode.png?size=40px
-    :target: https://github.com/mamcode
-    :alt: mamcode
-
-Current maintainer:
-
-|maintainer-mamcode| 
-
-This module is part of the `epayco/odoo_ePayco <https://github.com/epayco/odoo_ePayco/tree/12.0/payment_epayco>`_ project on GitHub.
-
-You are welcome to contribute.
