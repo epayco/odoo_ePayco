@@ -14,6 +14,7 @@
         'views/payment_epayco_templates.xml',
         'data/payment_acquirer_data.xml',
     ],
+    'images': ['static/images/screen_image.png'],
     'post_init_hook': 'create_missing_journal_for_acquirers',
     'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
