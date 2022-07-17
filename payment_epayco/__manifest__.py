@@ -6,6 +6,8 @@
     'category': 'Payment Acquirer',
     'summary': 'Payment Acquirer: ePayco Implementation',
     'description': """ePayco payment gateway.""",
+    'author': "ePayco",
+    'website': "http://epayco.com",
     'depends': ['payment'],
     'data': [
         'views/payment_views.xml',
