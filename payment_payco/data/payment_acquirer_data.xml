@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_acquirer_payco" model="payment.acquirer">
+        <field name="name">ePayco</field>
+        <field name="display_as">ePayco</field>
+        <field name="module_id" ref="base.module_payment_payco"/>
+        <field name="description" type="html">
+            <p>
+                A payment gateway to accept online payments via credit cards, debit cards and bank transfers.
+            </p>
+            <ul class="list-inline">
+                <li class="list-inline-item"><i class="fa fa-check"/>Online Payment</li>
+                <li class="list-inline-item"><i class="fa fa-check"/>Payment Status Tracking</li>
+            </ul>
+        </field>
+        <field name="provider">payco</field>
+        <field name="state">test</field>
+        <field name="pre_msg"><![CDATA[
+        <p></p>]]></field>
+
+        <field name="payco_cust_id">****</field>
+        <field name="payco_public_key">****</field>
+        <field name="payco_p_key">****</field>
+        <field name="image_128" type="base64" file="payment_payco/static/src/img/payco_icon.png"/>
+        <field name="redirect_form_view_id"  ref="redirect_form" />
+        <field name="support_authorization">False</field>
+        <field name="support_fees_computation">False</field>
+        <field name="support_refund"></field>
+        <field name="support_tokenization">False</field>
+    </record>
+
+    <record id="payment_method_payco" model="account.payment.method">
+        <field name="name">Payco</field>
+        <field name="code">payco</field>
+        <field name="payment_type">inbound</field>
+    </record>
+
+</odoo>

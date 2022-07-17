@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="checkout" inherit_id="payment.checkout">
+        <xpath expr="." position="inside">
+            <div id="payco-checkout"></div>
+            <script type="text/javascript" src="https://checkout.epayco.co/checkout.js"></script>
+        </xpath>
+    </template>
+
+    <template id="manage" inherit_id="payment.manage">
+        <xpath expr="." position="inside">
+            <div id="payco-checkout" class="d-none"></div>
+            <script type="text/javascript" src="https://checkout.epayco.co/checkout.js"></script>
+        </xpath>
+    </template>
+    <template id="redirect_form">
+        <form t-att-action="api_url" method="post">
+            <input type="hidden" name="public_key" t-att-value="public_key"/>
+            <input type="hidden" name="address1" t-att-value="address1"/>
+            <input type="hidden" name="amount" t-att-value="amount"/>
+            <input type="hidden" name="tax" t-att-value="tax"/>
+            <input type="hidden" name="base_tax" t-att-value="base_tax"/>
+            <input type="hidden" name="city" t-att-value="city"/>
+            <input type="hidden" name="country" t-att-value="country"/>
+            <input type="hidden" name="currency_code" t-att-value="currency_code"/>
+            <input type="hidden" name="email" t-att-value="email"/>
+            <input type="hidden" name="first_name" t-att-value="first_name"/>
+            <input type="hidden" name="last_name" t-att-value="last_name"/>
+            <input type="hidden" name="reference" t-att-value="reference"/>
+            <input type="hidden" name="lang" t-att-value="lang"/>
+            <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
+            <input type="hidden" name="test" t-att-value="test"/>
+            <input type="hidden" name="notify_url" t-att-value="confirmation_url"/>
+            <input type="hidden" name="return_url" t-att-value="response_url"/>
+            <input type="hidden" name="extra1" t-att-value="extra1"/>
+            <input type="hidden" name="extra2" t-att-value="extra2"/>
+            <input type="hidden" name="phone_number" t-att-value="phone_number"/>
+        </form>
+    </template>
+    <data noupdate="1">
+        <template id="proccess">
+              <t t-call="website.layout">
+                <div id="wrap">
+                    <div class="oe_structure oe_empty">
+                        <div class="container">
+                            <p style="margin-top: 10px;">Cargando medios de pago de ePayco...</p>
+                            <p>Si no se cargan automáticamente, de clic en el botón "Pagar con ePayco".</p>
+                            <div class="loader">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <div id="form-button-container">
+                                <form>
+                                    <script
+                                        src="https://checkout.epayco.co/checkout.js"
+                                        class="epayco-button"
+                                        t-att-data-epayco-key="public_key"
+                                        t-att-data-epayco-amount="amount"
+                                        t-att-data-epayco-tax="tax"
+                                        t-att-data-epayco-tax-base="base_tax"
+                                        t-att-data-epayco-name="reference"
+                                        t-att-data-epayco-description="reference"
+                                        t-att-data-epayco-invoice="reference"
+                                        t-att-data-epayco-extra1="extra1"
+                                        t-att-data-epayco-extra2="extra2"
+                                        t-att-data-epayco-extra3="reference"
+                                        t-att-data-epayco-currency="currency_code"
+                                        t-att-data-epayco-country="country_code"
+                                        t-att-data-epayco-external="checkout_external"
+                                        t-att-data-epayco-test="test"
+                                        t-att-data-epayco-lang="lang"
+                                        t-att-data-epayco-response="return_url"
+                                        t-att-data-epayco-confirmation="notify_url"
+                                        t-att-data-epayco-email-billing="email"
+                                        t-att-data-epayco-name-billing="firstname"
+                                        t-att-data-epayco-address-billing="address1"
+                                        t-att-data-epayco-phone-billing="phone_number"
+                                        data-epayco-button="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png"
+                                        data-epayco-autoclick="true"
+                                        >
+                                    </script>
+                                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                                    <script xmlns="http://www.w3.org/1999/xhtml">
+                                        window.onload = function() {
+                                        document.addEventListener("contextmenu", function(e){
+                                                e.preventDefault();
+                                            }, false);
+                                        }
+                                    </script>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </t>
+        </template>
+    </data>
+</odoo>
