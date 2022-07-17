@@ -35,7 +35,8 @@ class PaymentTransaction(models.Model):
         base_url = self.acquirer_id.get_base_url()
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
         test = 'false' if self.state == 'enabled' else 'true'
-        external = 'true'
+        lang = 'es' if self.partner_lang == 'es_CO' else 'en'
+        external = 'true' if self.acquirer_id.payco_checkout_type == 'standard' else 'false'
         split_reference = self.reference.split('-')
         reference = split_reference[0]
         sql = """select amount_tax from sale_order where name = '%s'
@@ -71,7 +72,7 @@ class PaymentTransaction(models.Model):
             'first_name': partner_first_name,
             'last_name': partner_last_name,
             "phone_number": tx.partner_id.phone.replace(' ', ''),
-            'lang': self.acquirer_id.payco_checkout_lang,
+            'lang': lang,
             'checkout_external': external,
             "test": test,
             'confirmation_url': urls.url_join(base_url, '/payco/confirmation/backend'),

@@ -23,19 +23,13 @@ class PaymentAcquirer(models.Model):
         string="PUBLICK_KEY", required_if_provider='payco', groups='base.group_system')
     payco_p_key = fields.Char(
         string="P_KEY", required_if_provider='payco', groups='base.group_system')
-    payco_checkout_lang = fields.Selection(
-        selection=[('es', 'ES'),
-                   ('en', 'EN')],
+    payco_checkout_type = fields.Selection(
+        selection=[('standard', 'Standard'),
+                   ('onapegae', 'On page')],
         required_if_provider='payco',
-        string='lenguaje Checkout',
-        default='es')
-
-    @api.onchange('state')
-    def _onchange_auth_state(self):
-        if self.provider == 'payco':
-            self.payco_cust_id = ''
-            self.payco_public_key = ''
-            self.payco_p_key = ''
+        string='tipo de Checkout',
+        default='standard')
+        
 
     @api.model
     def _get_compatible_acquirers(self, *args, currency_id=None, **kwargs):

@@ -14,7 +14,7 @@
                            attrs="{'required':[('provider', '=', 'payco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
                     <field name="payco_p_key"
                            attrs="{'required':[('provider', '=', 'payco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
-                    <field name="payco_checkout_lang" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <field name="payco_checkout_type" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
                     <a colspan="2" href="https://dashboard.epayco.com/configuration" target="_blank">
                        How to configure your epayco account?
                     </a>
