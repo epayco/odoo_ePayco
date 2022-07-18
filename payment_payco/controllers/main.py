@@ -146,6 +146,7 @@ class PaycoController(http.Controller):
         base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         response_url = urls.url_join(base_url, '/payco/redirect/backend')
         confirmation_url = urls.url_join(base_url, '/payco/confirmation/backend')
+        external = 'true' if acquirer_sudo.payco_checkout_type == 'standard' else 'false'
 
         payload = {
             "public_key": acquirer_sudo.payco_public_key,
@@ -157,7 +158,7 @@ class PaycoController(http.Controller):
             "first_name": tx_id.partner_id.name,
             "email": tx_id.partner_id.email,
             "currency": currency,
-            "lang": acquirer_sudo.payco_checkout_lang,
+            "lang": 'es',
             "test": testPayment,
             "country": tx_id.partner_id.country_id.code if tx_id.partner_id.country_id else "",
             "city": tx_id.partner_id.city,
@@ -167,7 +168,7 @@ class PaycoController(http.Controller):
             'extra2': data.get('reference'),
             "response_url": response_url,
             "confirmation_url": confirmation_url,
-            "checkoutType": "true"
+            "checkoutType": external
         }
         return payload
 
