@@ -18,14 +18,5 @@
     'images': ['static/images/screen_image.png'],
     'application': True,
     'uninstall_hook': 'uninstall_hook',
-    'assets': {
-        'web.assets_frontend': [
-            'payment_payco/static/src/js/payment_form.js',
-        ],
-        'web.assets_backend': [
-            'payment_payco/static/src/scss/backend.scss',
-            'payment_payco/static/src/js/paycowidget.js',
-        ]
-    },
     'license': 'LGPL-3',
 }
