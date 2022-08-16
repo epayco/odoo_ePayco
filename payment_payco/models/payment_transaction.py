@@ -34,7 +34,16 @@ class PaymentTransaction(models.Model):
 
         base_url = self.acquirer_id.get_base_url()
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
-        test = 'false' if self.state == 'enabled' else 'true'
+        sqlTestMethod = """select state from payment_acquirer where provider = '%s'
+                        """ % ('payco')
+        http.request.cr.execute(sqlTestMethod)
+        resultTestMethod = http.request.cr.fetchall() or []
+        if resultTestMethod:
+            (state) = resultTestMethod[0]
+        for testMethod in state:
+            test = testMethod
+        testPayment = 'true' if test == 'test' \
+            else 'false'
         lang = 'es' if self.partner_lang == 'es_CO' else 'en'
         external = 'true' if self.acquirer_id.payco_checkout_type == 'standard' else 'false'
         split_reference = self.reference.split('-')
@@ -74,7 +83,7 @@ class PaymentTransaction(models.Model):
             "phone_number": tx.partner_id.phone.replace(' ', ''),
             'lang': lang,
             'checkout_external': external,
-            "test": test,
+            "test": testPayment,
             'confirmation_url': urls.url_join(base_url, '/payco/confirmation/backend'),
             'response_url': urls.url_join(base_url,'/payco/redirect/backend'),
             'api_url': urls.url_join(base_url, '/payment/payco/checkout'),
