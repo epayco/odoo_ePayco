@@ -36,7 +36,7 @@
                             <div id="form-button-container">
                                 <form>
                                     <script
-                                        src="https://checkout.epayco.co/checkout.js"
+                                        src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js?version=1643645084821"
                                         class="epayco-button"
                                         t-att-data-epayco-key="public_key"
                                         t-att-data-epayco-amount="amount"
@@ -44,6 +44,7 @@
                                         t-att-data-epayco-tax-base="base_tax"
                                         t-att-data-epayco-name="txnid"
                                         t-att-data-epayco-description="txnid"
+                                        t-att-data-epayco-invoice="extra1"
                                         t-att-data-epayco-extra1="extra1"
                                         t-att-data-epayco-extra2="productinfo"
                                         t-att-data-epayco-extra3="extra2"
