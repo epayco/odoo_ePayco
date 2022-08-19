@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_acquirer_form_payco" model="ir.ui.view">
+        <field name="name">payment.acquirer.form.inherit</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment.acquirer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//group[@name="acquirer"]' position='after'>
+                <group attrs="{'invisible': [('provider', '!=', 'payco')]}">
+                    <field name="payco_merchant_key"/>
+                    <field name="payco_merchant_salt"/>
+                    <field name="payco_p_keyt" password="True"/>
+                    <field name="payco_checkout_type" attrs="{'invisible': [('provider', '!=', 'payco')]}"/>
+                    <a colspan="2" href="https://dashboard.epayco.com/configuration" target="_blank">How to configure your epayco account?</a>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

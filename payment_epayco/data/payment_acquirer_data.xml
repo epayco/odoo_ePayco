@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="payment_acquirer_payco" model="payment.acquirer">
+            <field name="name">ePayco</field>
+            <field name="image_128" type="base64" file="payment_epayco/static/src/img/epayco_icon.png"/>
+            <field name="provider">payco</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="view_template_id" ref="payco_form"/>
+            <field name="description" type="html">
+                <p>
+                    A payment gateway to accept online payments via credit cards, debit cards and cash.
+                </p>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><i class="fa fa-check"/>Online Payment</li>
+                    <li class="list-inline-item"><i class="fa fa-check"/>Payment Status Tracking</li>
+                </ul>
+            </field>
+            <field name="pre_msg"><![CDATA[
+                <p>You will be redirected to the ePayco website after clicking on the payment button.</p>]]>
+            </field>
+            <field name="payco_merchant_key">dummy</field>
+            <field name="payco_merchant_salt">dummy</field>
+            <field name="payco_p_keyt">dummy</field>
+            <field name="payco_checkout_type"></field>
+        </record>
+    </data>
+</odoo>

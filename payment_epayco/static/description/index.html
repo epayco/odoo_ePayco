@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Odoo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+    <link href="https://apps.odoocdn.com/web/content/7297172-19e3d31/1/web.assets_frontend.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <style>
+        .main_list_ul li{
+            text-indent: -24px;
+        }
+    </style>
+</head>
+<!-- odoo description page css -->
+
+<body style="overflow-x: hidden;">
+
+    <!-- Header -->
+    <div class="row justify-content-md-between justify-content-center border-bottom align-items-center py-2 mx-0">
+        <div class="text-center mr-lg-5 mb-3 mb-lg-0">
+            <a class="btn p-2" href="http://epayco.com/" target="_blank">
+                <img src="icon.svg" alt="warlock-logo" style="height: 70px">
+            </a>
+        </div>
+        <div class="d-flex flex-wrap justify-content-center py-2">
+            <div class="text-center">
+                <a href="https://apps.odoo.com/apps/modules/browse?search=epayco" target="_blank" class="btn btn-sm mb-2 mb-lg-0"
+                style="padding: 7px;font-size: 13px;font-size: 14px; font-weight: 500;background-color: #045373;color:#fff;"><i
+                class="fa fa-list-alt mr-1"></i> <span class="d-none d-sm-inline"></span> Our Apps</a>
+            </div>
+        </div>
+        <div class="mt-md-0 mt-4 mb-3 mb-lg-0">
+            <span
+            style="padding: 7px;font-size: 13px;font-size: 14px; font-weight: 500;background-color: #045373;color:#fff;"><i
+            class="fa fa-check"></i> Community</span>
+            <span
+            style="padding: 7px;font-size: 13px;font-size: 14px; font-weight: 500;background-color: #045373;color:#fff;"><i
+            class="fa fa-check"></i> Enterprise</span>
+        </div>
+    </div>
+
+    <!--nav   -->
+    <div class="loempia-tabs">
+        <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="ratings-tab" data-toggle="tab" href="#ratings" role="tab" aria-controls="ratings" aria-selected="true">Key features</a>
+            </li>
+        </ul>
+        <div class="row mt-2 mb-2">
+            <div class="col-1 offset-1">
+                <div class="modal fade" id="report_comment_modal" tabindex="10000" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="report_modal_title">Report comment</h5>
+                                <small>
+                                    <span class="text-muted fa fa-info-circle"> Any abuse of this reporting system will be penalized</span>
+                                </small>
+                            </div>
+                            <div class="modal-body">
+                                <form id="comment_report_form" class="col-md-11 offset-md-1">
+                                    <input name="rating_id" type="hidden">
+                                    <label>
+                                        <input type="radio" name="reason" value="racist"> Hate speech or graphic violence
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="reason" value="sexual"> Pornography, sexually explicit material
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="reason" value="advertising"> Unwanted commercial content or spam
+                                    </label>
+                                    <br>
+                                    <label>
+                                        <input type="radio" name="reason" value="insult"> Harassment or bullying
+                                    </label>
+                                    <br>
+                                    <div class="modal-footer">
+                                        <button type="submit" id="submit_reseller_modal" class="btn btn-primary">Confirm</button>
+                                        <button type="button" id="cancel_reseller_modal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="ratings" role="tabpanel" aria-labelledby="ratings-tab">
+
+                <div class="row">
+                    <section class="container">
+                        <h3 style="font-size: 20px; color: #045373;font-family: &quot;Montserrat&quot;;font-weight: 200;text-align:center;text-transform: uppercase;margin-top:32px;margin-bottom:32px;"><b>
+                        ePayco Payment Acquirer</b></h3>
+                    </section>
+
+                    <div id="loempia_tabs" class="container py-5 oe_styling_v8"
+                    style="color: #0b3b52;font-family: 'Open sans','sans-serif';overflow: hidden;">
+
+        <!-- tab view start -->
+        <div>
+            <section class="oe_container">
+                <h3 style="font-size:20px; color: #045373;font-family: &quot;Montserrat&quot;font-weight:  200;text-align:center;text-transform: uppercase;margin-top:32px;margin-bottom:5px;">
+                Highlights</h3>
+            </section>
+        </div>
+
+        <section class="oe_container oe_light">
+
+            <div class="oe_row oe_spaced">
+                <ul>
+                    <li class="mt-5 mb-1" style="color:#045373;font-weight:bold;">
+                        After installation of this module you will see the ePayco in payment acquirers list.
+                    </li>
+                    <li class="mt-1 mb-2" style="color:#045373;font-weight:bold;">
+                        Invoicing -> Configuration -> Payments -> Payment Acquirers
+                    </li>
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+                    <img style="max-width: 100%;" src="1.png">
+                </div>
+
+                <ul>
+                    <li class="mt-5 mb-2" style="color:#045373;font-weight:bold;">
+                        Configure ePayco for testing environment.
+
+                    </li>
+
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+                    <img style="max-width: 100%;" src="2.png">
+                </div>
+                <br/>
+
+
+                <ul>
+                    <li class="mt-5 mb-2" style="color:#045373;font-weight:bold;">
+                        Now go to the website add product into the cart and go to the payment page.
+                    </li>
+                    <li class="mt-1 mb-1" style="color:#045373;font-weight:bold;">
+                        We can see the option for ePayco payment.
+                    </li>
+                    <li class="mt-1 mb-1" style="color:#045373;font-weight:bold;">
+                        Select the ePayco payment and click on pay now.
+                    </li>
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+                    <img style="max-width: 100%;" src="3.png">
+                </div>
+
+                <br/>
+                <ul>
+                    <li class="mt-5 mb-4" style="color:#045373;font-weight:bold;">
+                        Once you will click on pay now button it will show you the popup for ePayco payment.
+                    </li>
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+                    <img style="max-width: 100%;" src="4.png">
+                </div>
+
+                <ul>
+                    <li class="mt-5 mb-2" style="color:#045373;font-weight:bold;">
+                        You have to enter card detail and click on pay.
+                    </li>
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+
+                </div>
+
+                <br/>
+
+                <ul>
+                    <li class="mt-5 mb-4" style="color:#045373;font-weight:bold;">
+                        Once your payment is done it will show you the payment successfull message.
+                    </li>
+                </ul>
+                <div class="oe_screenshot" style="text-align: left;">
+                    <img style="max-width: 100%;" src="6.png">
+                </div>
+
+
+                <br/>
+
+                <!-- Wizard Technolab Suggested apps  -->
+
+            </div>
+        </section>
+
+    </div>
+
+</div>
+</div>
+
+<!-- Wizard Technolab Odoo Services -->
+
+
+<!-- Wizard Technolab Footer -->
+<div class="row no-gutters mx-0 justify-content-sm-between
+ustify-content-center" style="border-top: 1px solid black;">
+<div class="d-flex align-items-center"></div>
+<div class="mb-sm-0 mb-3 d-flex align-items-center">
+    <img src="letter.svg" style="width: 35px;height: 35px;margin-right: 20px"/>
+    <span class="text-center my-4" style="font-size: 18px; color: #045373;">desarrollo@payco.co</span>
+</div>
+<div class="d-flex align-items-center"></div>
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
