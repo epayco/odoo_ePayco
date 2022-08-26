@@ -80,7 +80,7 @@ class PaymentTransaction(models.Model):
             'email': self.partner_email,
             'first_name': partner_first_name,
             'last_name': partner_last_name,
-            "phone_number": tx.partner_id.phone.replace(' ', ''),
+            "phone_number":'',
             'lang': lang,
             'checkout_external': external,
             "test": testPayment,
