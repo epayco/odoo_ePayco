@@ -148,7 +148,7 @@ class PaymentTransaction(models.Model):
                     if cod_response == 1:
                         self.payco_payment_ref = data.get('x_extra2')
                         self._set_done()
-                        #self._finalize_post_processing()
+                        self._finalize_post_processing()
             else:
                 if cod_response == 1:
                     self.payco_payment_ref = data.get('x_extra2')
