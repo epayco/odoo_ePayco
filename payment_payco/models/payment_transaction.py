@@ -140,7 +140,7 @@ class PaymentTransaction(models.Model):
                 (state) = result[0]
             for testMethod in state:
                 tx = testMethod
-            cod_response = int(data.get('x_cod_response'))
+            cod_response = int(data.get('x_cod_response')) if int(data.get('x_cod_response')) else int(data.get('x_cod_respuesta'))
             if tx not in ['draft']:
                 if cod_response not in [1, 3]:
                     self.manage_status_order(data.get('x_extra3'), 'sale_order')
@@ -148,12 +148,12 @@ class PaymentTransaction(models.Model):
                     if cod_response == 1:
                         self.payco_payment_ref = data.get('x_extra2')
                         self._set_done()
-                        self._finalize_post_processing()
+                        #self._finalize_post_processing()
             else:
                 if cod_response == 1:
                     self.payco_payment_ref = data.get('x_extra2')
                     self._set_done()
-                    self._finalize_post_processing()
+                    #self._finalize_post_processing()
                 elif cod_response == 3:
                     self._set_pending()
                 else:
