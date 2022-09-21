@@ -36,7 +36,7 @@
                             <div id="form-button-container">
                                 <form>
                                     <script
-                                        src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js?version=1643645084821"
+                                        src="https://checkout.epayco.co/checkout.js"
                                         class="epayco-button"
                                         t-att-data-epayco-key="public_key"
                                         t-att-data-epayco-amount="amount"
