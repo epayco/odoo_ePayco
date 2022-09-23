@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template>
+
+    <t t-name="payment_payco.payco_button">
+        <div class="payco_payment_class">
+            <span t-att-class="widget.className">
+                <t t-esc="widget.text"/>
+            </span>
+            <div id="payco-checkout"/>
+        </div>
+    </t>
+
+</template>

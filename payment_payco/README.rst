@@ -14,7 +14,11 @@ Epayco Payment Acquirer
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-epayco%2Fodoo_ePayco-lightgray.png?logo=github
+<<<<<<< HEAD:payment_epayco/README.rst
     :target: https://github.com/epayco/odoo_ePayco/tree/15.0/payment_epayco
+=======
+    :target: https://github.com/epayco/odoo_ePayco/tree/15.0/payment_payco
+>>>>>>> 15.0:payment_payco/README.rst
     :alt: epayco/odoo_ePayco
 
 |badge1| |badge2| |badge3| 
