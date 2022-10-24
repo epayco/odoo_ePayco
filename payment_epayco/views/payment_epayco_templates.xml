@@ -75,7 +75,7 @@
                                     t-att-data-epayco-address-billing="address1"
                                     t-att-data-epayco-phone-billing="phone_number"
                                     data-epayco-button="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png"
-                                    data-epayco-autoclick="false"
+                                    data-epayco-autoclick="true"
                                     >
                                 </script>
                                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
