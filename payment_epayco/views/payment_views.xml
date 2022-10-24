@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_acquirer_form" model="ir.ui.view">
+        <field name="name">ePayco Acquirer Form</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment.payment_acquirer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//group[@name="acquirer"]' position='inside'>
+                <group attrs="{'invisible': [('provider', '!=', 'epayco')]}">
+                    <field name="epayco_cust_id"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_public_key"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_p_key"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_checkout_type" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <field name="epayco_checkout_lang" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <a colspan="2" href="https://dashboard.epayco.com/configuration" target="_blank">
+                       How to configure your epayco account?
+                    </a>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="payment_transaction_form" model="ir.ui.view">
+        <field name="name">ePayco Transaction Form</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='acquirer_reference']" position="after">
+                <field name="epayco_payment_ref"
+                       readonly="1"
+                       attrs="{'invisible': [('provider', '!=', 'epayco')]}"
+                       groups="base.group_no_one"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

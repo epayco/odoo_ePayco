@@ -1,4 +1,4 @@
-odoo.define('payment_payco.payment_form', require => {
+odoo.define('payment_epayco.payment_form', require => {
     'use strict';
 
     const core = require('web.core');
@@ -9,14 +9,14 @@ odoo.define('payment_payco.payment_form', require => {
 
     const _t = core._t;
 
-    const PaycoMixin = {
+    const EpaycoMixin = {
         _processRedirectPayment: function (provider, paymentOptionId, processingValues) {
-            
-            if (provider !== 'payco') {
+
+            if (provider !== 'epayco') {
                 return this._super(...arguments);
             }
             var self = this;
-            $.post('/payment/payco/transction/process', processingValues).done(function(data, status ){
+            $.post('/payment/epayco/transction/process', processingValues).done(function(data, status ){
             try{
                 var myObj = JSON.parse(data);
                 var jsondata = JSON.parse(myObj);
@@ -59,9 +59,9 @@ odoo.define('payment_payco.payment_form', require => {
         },
     };
     try{
-    checkoutForm.include(PaycoMixin);
-    manageForm.include(PaycoMixin);
+        checkoutForm.include(EpaycoMixin);
+        manageForm.include(EpaycoMixin);
     }catch (e) {
-              console.log("epayco error")
-            }
+        console.log("epayco error")
+    }
 });

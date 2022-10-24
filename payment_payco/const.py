@@ -1,5 +1,5 @@
 SUPPORTED_CURRENCIES = (
-    'COP','USD'
+    'COP', 'USD'
 )
 PAYMENT_STATUS_MAPPING = {
     'pending': ('Pending',),

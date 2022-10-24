@@ -9,7 +9,7 @@ from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo import http
 from odoo.addons.payment import utils as payment_utils
-from odoo.addons.payment_payco.controllers.main import PaycoController
+from odoo.addons.payment_epayco.controllers.main import EpaycoController
 
 _logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    payco_payment_ref = fields.Char(string="ePayco Payment Reference")
+    epayco_payment_ref = fields.Char(string="ePayco Payment Reference")
 
     def _get_specific_rendering_values(self, processing_values):
         """ Override of payment to return ePayco-specific rendering values.
@@ -29,24 +29,17 @@ class PaymentTransaction(models.Model):
         :rtype: dict
         """
         res = super()._get_specific_rendering_values(processing_values)
-        if self.provider != 'payco':
+        if self.provider != 'epayco':
             return res
 
         base_url = self.acquirer_id.get_base_url()
         partner_first_name, partner_last_name = payment_utils.split_partner_name(self.partner_name)
-        sqlTestMethod = """select state from payment_acquirer where provider = '%s'
-                        """ % ('payco')
-        http.request.cr.execute(sqlTestMethod)
-        resultTestMethod = http.request.cr.fetchall() or []
-        if resultTestMethod:
-            (state) = resultTestMethod[0]
-        for testMethod in state:
-            test = testMethod
-        testPayment = 'true' if test == 'test' \
-            else 'false'
-        lang = 'es' if self.partner_lang == 'es_CO' else 'en'
-        external = 'true' if self.acquirer_id.payco_checkout_type == 'standard' else 'false'
+
+        testMode = self.acquirer_id._epayco_get_state_mode()
+        lang = 'es' if self.acquirer_id.epayco_checkout_lang == 'ES' else 'en'
+        external = 'true' if self.acquirer_id.epayco_checkout_type == 'standard' else 'false'
         split_reference = self.reference.split('-')
+
         reference = split_reference[0]
         sql = """select amount_tax from sale_order where name = '%s'
                         """ % (reference)
@@ -69,7 +62,7 @@ class PaymentTransaction(models.Model):
         tx = self.env['payment.transaction'].search([('reference', '=', self.reference)])
 
         return {
-            'public_key': self.acquirer_id.payco_public_key,
+            'public_key': self.acquirer_id.epayco_public_key,
             'address1': self.partner_address,
             'amount': self.amount,
             'tax': tax,
@@ -83,10 +76,10 @@ class PaymentTransaction(models.Model):
             "phone_number":'',
             'lang': lang,
             'checkout_external': external,
-            "test": testPayment,
-            'confirmation_url': urls.url_join(base_url, '/payco/confirmation/backend'),
-            'response_url': urls.url_join(base_url,'/payco/redirect/backend'),
-            'api_url': urls.url_join(base_url, '/payment/payco/checkout'),
+            "test": testMode,
+            'confirmation_url': urls.url_join(base_url, '/epayco/confirmation/backend'),
+            'response_url': urls.url_join(base_url,'/epayco/redirect/backend'),
+            'api_url': urls.url_join(base_url, '/payment/epayco/checkout'),
             'extra1': str(tx.id),
             'extra2': self.reference,
             'reference': str(reference)
@@ -103,11 +96,11 @@ class PaymentTransaction(models.Model):
         :raise: ValidationError if the data match no transaction
         """
         tx = super()._get_tx_from_feedback_data(provider, data)
-        if provider != 'payco':
+        if provider != 'epayco':
             return tx
         try:
             tx_id = data.get('x_extra1')
-            tx = self.search([('id', '=', int(tx_id)), ('provider', '=', 'payco')])
+            tx = self.search([('id', '=', int(tx_id)), ('provider', '=', 'epayco')])
             if not tx:
                 raise ValidationError(
                     "ePayco: " + _("No transaction found")
@@ -128,7 +121,7 @@ class PaymentTransaction(models.Model):
         :raise: ValidationError if inconsistent data were received
         """
         super()._process_feedback_data(data)
-        if self.provider != 'payco':
+        if self.provider != 'epayco':
             return
         tx = ''
         if data:
@@ -146,12 +139,12 @@ class PaymentTransaction(models.Model):
                     self.manage_status_order(data.get('x_extra3'), 'sale_order')
                 else:
                     if cod_response == 1:
-                        self.payco_payment_ref = data.get('x_extra2')
+                        self.epayco_payment_ref = data.get('x_extra2')
                         self._set_done()
                         self._finalize_post_processing()
             else:
                 if cod_response == 1:
-                    self.payco_payment_ref = data.get('x_extra2')
+                    self.epayco_payment_ref = data.get('x_extra2')
                     self._set_done()
                     #self._finalize_post_processing()
                 elif cod_response == 3:
