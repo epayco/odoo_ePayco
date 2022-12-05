@@ -14,7 +14,7 @@ Epayco Payment Acquirer
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-epayco%2Fodoo_ePayco-lightgray.png?logo=github
-    :target: https://github.com/epayco/odoo_ePayco/tree/15.0/payment_epayco
+    :target: https://github.com/epayco/odoo_ePayco/tree/12.0/payment_epayco
     :alt: epayco/odoo_ePayco
 
 |badge1| |badge2| |badge3| 
@@ -32,8 +32,8 @@ Installation
 Para instalar este modulo necesita:
 
 1. Agregar el directorio clonado de este repositorio a la ruta de addons de la instancia de Odoo. 
-2. Ir a aplicaciones y actualizar la lista de aplicaciones.
-3. Instalar el modulo payment_payco.
+2. Ir a la base de datos y actualizar la lista de aplicaciones.
+3. Instalar el modulo payment_epayco.
    
 
 Configuration
