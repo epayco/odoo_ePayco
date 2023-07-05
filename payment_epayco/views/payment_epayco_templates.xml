@@ -1,81 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="payco_form">
-        <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
-        <input type="hidden" name="public_key" t-att-value='public_key' />
-        <input type="hidden" name="txnid" t-att-value='txnid' />
-        <input type="hidden" name="amount" t-att-value='amount' />
-        <input type="hidden" name="tax" t-att-value='tax' />
-        <input type="hidden" name="base_tax" t-att-value='base_tax' />
-        <input type="hidden" name="productinfo" t-att-value='productinfo' />
-        <input type="hidden" name="firstname" t-att-value='firstname' />
-        <input type="hidden" name="email" t-att-value='email' />
-        <input type="hidden" name="phone" t-att-value='phone'/>
-        <input type="hidden" name="currency_code" t-att-value='currency_code'/>
-        <input type="hidden" name="country_code" t-att-value='country_code'/>
-        <input type="hidden" name="epayco_checkout_external" t-att-value='epayco_checkout_external'/>
-        <input type="hidden" name="epayco_env_test" t-att-value='epayco_env_test'/>
-        <input type="hidden" name="epayco_lang" t-att-value='epayco_lang'/>
-        <input type="hidden" name="response_url" t-att-value='response_url'/>
-        <input type="hidden" name="url_confirmation" t-att-value='url_confirmation'/>
-        <input type="hidden" name="extra1" t-att-value='extra1'/>
-        <input type="hidden" name="extra2" t-att-value='extra2'/>
-        <input type="hidden" name="extra3" t-att-value='extra3'/>
-    </template>
-    <data noupdate="1">
-        <template id="checkout">
-              <t t-call="website.layout">
-                <div id="wrap">
-                    <div class="oe_structure oe_empty">
-                        <div class="container">
-                            <p style="margin-top: 10px;">Cargando medios de pago de ePayco...</p>
-                            <p>Si no se cargan automáticamente, de clic en el botón "Pagar con ePayco".</p>
-                            <div class="loader">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                            <div id="form-button-container">
-                                <form>
-                                    <script
-                                        src="https://checkout.epayco.co/checkout.js"
-                                        class="epayco-button"
-                                        t-att-data-epayco-key="public_key"
-                                        t-att-data-epayco-amount="amount"
-                                        t-att-data-epayco-tax="tax"
-                                        t-att-data-epayco-tax-base="base_tax"
-                                        t-att-data-epayco-name="txnid"
-                                        t-att-data-epayco-description="txnid"
-                                        t-att-data-epayco-invoice="extra1"
-                                        t-att-data-epayco-extra1="extra1"
-                                        t-att-data-epayco-extra2="productinfo"
-                                        t-att-data-epayco-extra3="extra2"
-                                        t-att-data-epayco-extra4="epayco_env_test"
-                                        t-att-data-epayco-currency="currency_code"
-                                        t-att-data-epayco-country="country_code"
-                                        t-att-data-epayco-external="epayco_checkout_external"
-                                        t-att-data-epayco-test="epayco_env_test"
-                                        t-att-data-epayco-lang="epayco_lang"
-                                        t-att-data-epayco-email-billing="email"
-                                        t-att-data-epayco-name-billing="firstname"
-                                        t-att-data-epayco-response="response_url"
-                                        t-att-data-epayco-confirmation="url_confirmation"
-                                        data-epayco-button="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png"
-                                        data-epayco-autoclick="true"
-                                        >
-                                    </script>
-                                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-                                    <script xmlns="http://www.w3.org/1999/xhtml">
-                                        window.onload = function() {
-                                        document.addEventListener("contextmenu", function(e){
-                                                e.preventDefault();
-                                            }, false);
-                                        }
-                                    </script>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-              </t>
-        </template>
-    </data>
+
+    <record id="payment_acquirer_form" model="ir.ui.view">
+        <field name="name">ePayco Acquirer Form</field>
+        <field name="model">payment.acquirer</field>
+        <field name="inherit_id" ref="payment.payment_acquirer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr='//group[@name="acquirer"]' position='inside'>
+                <group attrs="{'invisible': [('provider', '!=', 'epayco')]}">
+                    <field name="epayco_cust_id"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_public_key"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_p_key"
+                           attrs="{'required':[('provider', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_checkout_type" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <field name="epayco_checkout_lang" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <a colspan="2" href="https://dashboard.epayco.com/configuration" target="_blank">
+                       How to configure your epayco account?
+                    </a>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
