@@ -14,7 +14,7 @@ Epayco Payment Acquirer
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-epayco%2Fodoo_ePayco-lightgray.png?logo=github
-    :target: https://github.com/epayco/odoo_ePayco/tree/12.0/payment_epayco
+    :target: https://github.com/epayco/odoo_ePayco/tree/15.0/payment_epayco
     :alt: epayco/odoo_ePayco
 
 |badge1| |badge2| |badge3| 
@@ -47,6 +47,10 @@ Configuration
   
 * Si ya ha probado el modulo y esta conforme puede cambiar el ambiente a producción.
 
+*Tomar en cuenta que en su dashboard de ePayco debe configurar las urls de respuesta y confirmación en el menú Integraciones en la sección "Opciones pasarela". El modulo genera automáticamente estas urls:*
+
+* URL de respuesta: <base_url>/payment/epayco/response/
+* URL de confirmacion: <base_url>/payment/epayco/confirmation/
 
 Bug Tracker
 ===========

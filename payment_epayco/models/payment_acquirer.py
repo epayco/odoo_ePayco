@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from hashlib import md5
+import hashlib
 
 from odoo import api, fields, models
 from odoo.tools.float_utils import float_repr
@@ -48,37 +48,22 @@ class PaymentAcquirerEpayco(models.Model):
         return acquirers
 
     def _epayco_generate_sign(self, values, incoming=True):
-        """ Generate the signature for incoming or outgoing communications.
-
-        :param dict values: The values used to generate the signature
-        :param bool incoming: Whether the signature must be generated for an incoming (Epayco to
-                              Odoo) or outgoing (Odoo to Epayco) communication.
-        :return: The signature
-        :rtype: str
-        """
         if incoming:
-            data_string = '~'.join([
+            p_key = self.epayco_p_key
+            x_ref_payco = values.get('x_ref_payco')
+            x_transaction_id = values.get('x_transaction_id')
+            x_amount = values.get('x_amount')
+            x_currency_code = values.get('x_currency_code')
+            hash_str_bytes = bytes('%s^%s^%s^%s^%s^%s' % (
                 self.epayco_cust_id,
-                self.epayco_p_key,
-                values['referenceCode'],
-                # http://developers.epayco.com/en/web_checkout/integration.html
-                # Section: 2. Response page > Signature validation
-                # Epayco use the "Round half to even" rounding method
-                # to generate their signature. This happens to be Python 3's
-                # default rounding method.
-                float_repr(float(values.get('TX_VALUE')), 1),
-                values['currency'],
-                values.get('transactionState'),
-            ])
-        else:
-            data_string = '~'.join([
-                self.epayco_cust_id,
-                self.epayco_p_key,
-                values['referenceCode'],
-                float_repr(float(values['amount']), 1),
-                values['currency'],
-            ])
-        return md5(data_string.encode('utf-8')).hexdigest()
+                p_key,
+                x_ref_payco,
+                x_transaction_id,
+                x_amount,
+                x_currency_code), 'utf-8')
+            hash_object = hashlib.sha256(hash_str_bytes)
+            hash = hash_object.hexdigest()
+        return hash
 
     def _get_default_payment_method_id(self):
         self.ensure_one()

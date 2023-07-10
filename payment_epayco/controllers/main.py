@@ -19,8 +19,8 @@ import json
 _logger = logging.getLogger(__name__)
 
 class EpaycoController(http.Controller):
-    _return_url = '/payment/epayco/response/'
-    _confirm_url = '/payment/epayco/confirm/'
+    _return_url = '/payment/epayco/response'
+    _confirm_url = '/payment/epayco/confirm'
     _proccess_url = '/payment/epayco/checkout'
 
     @http.route(['/payment/epayco/checkout'], type='http', auth='public', website=True, csrf=False, save_session=False)
@@ -30,13 +30,13 @@ class EpaycoController(http.Controller):
         return request.render('payment_epayco.proccess', post)
 
     @http.route(
-        '/payment/epayco/confirm/', type='http', auth='public', website=True, csrf=False, save_session=False
+        _confirm_url, type='http', auth='public', methods=['POST'], csrf=False
     )
     def epayco_backend_confirm(self, **post):
         return self._epayco_process_response(post,confirmation=True)
 
     @http.route(
-        '/payment/epayco/response/', type='http', auth='public', website=True, csrf=False, save_session=False
+        _return_url, type='http', auth='public', website=True, csrf=False, save_session=False
     )
     def epayco_backend_redirec(self, **post):
         return self._epayco_process_response(post)
@@ -49,13 +49,19 @@ class EpaycoController(http.Controller):
             url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
                 ref_epayco)
             response = requests.get(url)
+            print("ePayco ref_payco")
+            print("================= response =======================")
+            print(response)
             if response.status_code == 200:
                 data = response.json().get('data')
+                
                 request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
                 return request.redirect('/payment/status')
             else:
                 return request.redirect('/shop/payment')
         else:
+            print("ePayco ref_payco")
+            print("================== confirmation ======================")
             request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
             return Response(status=200)
 
