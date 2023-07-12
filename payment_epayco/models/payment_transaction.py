@@ -47,6 +47,7 @@ class PaymentTransaction(models.Model):
             tax = tax_amount
         base_tax = float(float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2))-float(tax))
         external = 'true' if self.acquirer_id.epayco_checkout_type == 'standard' else 'false'
+        test = 'true' if self.acquirer_id.state == 'test' else 'false'
         epayco_values = {
             'api_url': api_url,
             "public_key": self.acquirer_id.epayco_public_key,
@@ -59,7 +60,7 @@ class PaymentTransaction(models.Model):
             "reference": str(plit_reference[0]),
             "lang": self.acquirer_id.epayco_checkout_lang,
             "checkout_external": external,
-            "test": self.acquirer_id.state,
+            "test": test,
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
             "confirmation_url": urls.url_join(self.get_base_url(), EpaycoController._confirm_url),
             'extra2': self.reference
@@ -72,8 +73,8 @@ class PaymentTransaction(models.Model):
         if provider != 'epayco':
             return tx
 
-        reference = data.get('referenceCode')
-        sign = data.get('signature')
+        reference = data.get('x_extra2')
+        sign = data.get('x_signature')
         if not reference or not sign:
             raise ValidationError(
                 "Epayco: " + _(
@@ -105,15 +106,18 @@ class PaymentTransaction(models.Model):
         if self.provider != 'epayco':
             return
 
-        self.acquirer_reference = data.get('transactionId')
-
-        status = data.get('lapTransactionState')
-        state_message = data.get('message')
-        if status == 'PENDING':
-            self._set_pending(state_message=state_message)
-        elif status == 'APPROVED':
+        self.acquirer_reference = data.get('x_extra2')
+        tx = self.search([('reference', '=', data.get('x_extra2')), ('provider', '=', 'epayco')])
+        status = str(data.get('x_transaction_state'))
+        state_message = data.get('x_response_reason_text')
+        print("========== payment ===========")
+        print(status)
+        if status ==  'Pendiente':
+            print(state_message)
+            #self._set_pending(state_message=state_message)
+        if status == 'Aceptada':
             self._set_done(state_message=state_message)
-        elif status in ('EXPIRED', 'DECLINED'):
+        elif status in ('Rechazada', 'Abandonada', 'Cancelada', 'Expirada'):
             self._set_canceled(state_message=state_message)
         else:
             _logger.warning(

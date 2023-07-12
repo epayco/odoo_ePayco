@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
     'name': 'ePayco Payment Acquirer',
-    'category': 'Payment Acquirer',
+    'version': '1.0',
+    'category': 'Accounting/Payment Acquirers',
+    'sequence': 100,
     'summary': 'Payment Acquirer: ePayco Implementation',
-    'description': """ePayco payment gateway.""",
+    'description': """ePayco Payment Acquirer""",
     'author': "ePayco",
     'website': "http://epayco.com",
     'depends': ['payment'],
@@ -15,7 +16,7 @@
         'data/payment_acquirer_data.xml',
     ],
     'images': ['static/images/screen_image.png'],
-    'post_init_hook': 'create_missing_journal_for_acquirers',
+    'application': True,
     'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
 }
