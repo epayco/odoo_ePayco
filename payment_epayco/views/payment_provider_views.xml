@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">ePayco Provider Form</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <!--<xpath expr='//group[@name="provider"]' position='inside'>-->
+            <group name="provider_credentials" position='inside'>
+                <group attrs="{'invisible': [('code', '!=', 'epayco')]}">
+                    <field name="epayco_cust_id"
+                           attrs="{'required':[('code', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_public_key"
+                           attrs="{'required':[('code', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_private_key"
+                           attrs="{'required':[('code', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_p_key"
+                           attrs="{'required':[('code', '=', 'epayco'), ('state', '!=', 'disabled')], 'invisible': [('state', '=', 'disabled')]}" />
+                    <field name="epayco_checkout_type" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <field name="epayco_checkout_lang" attrs="{'invisible': [('state', '=', 'disabled')]}"/>
+                    <a colspan="2" href="https://dashboard.epayco.com/configuration" target="_blank">
+                       How to configure your epayco account?
+                    </a>
+                </group>
+            </group>
+            <!--</xpath>-->
+        </field>
+    </record>
+
+</odoo>

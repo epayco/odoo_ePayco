@@ -3,13 +3,14 @@
 import logging
 import sys
 import pprint
+import socket
 
 from werkzeug import urls
 
 from odoo import _, api, models, http
 from odoo.http import request
 from odoo.exceptions import ValidationError
-from odoo.tools.float_utils import float_repr
+from odoo.tools.float_utils import float_repr,float_compare
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_epayco.controllers.main import EpaycoController
@@ -32,7 +33,7 @@ class PaymentTransaction(models.Model):
 
     def _get_specific_rendering_values(self, processing_values):
         res = super()._get_specific_rendering_values(processing_values)
-        if self.provider != 'epayco':
+        if self.provider_code != 'epayco':
             return res
 
         api_url = EpaycoController._proccess_url
@@ -45,12 +46,15 @@ class PaymentTransaction(models.Model):
             (amount_tax) = result[0]
         for tax_amount in amount_tax:
             tax = tax_amount
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
         base_tax = float(float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2))-float(tax))
-        external = 'true' if self.acquirer_id.epayco_checkout_type == 'standard' else 'false'
-        test = 'true' if self.acquirer_id.state == 'test' else 'false'
+        external = 'true' if self.provider_id.epayco_checkout_type == 'standard' else 'false'
+        test = 'true' if self.provider_id.state == 'test' else 'false'
         epayco_values = {
             'api_url': api_url,
-            "public_key": self.acquirer_id.epayco_public_key,
+            "public_key": self.provider_id.epayco_public_key,
+            "private_key": self.provider_id.epayco_private_key,
             "amount": str(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2)),
             "tax": str(tax),
             'base_tax': str(base_tax),
@@ -58,12 +62,13 @@ class PaymentTransaction(models.Model):
             "email": self.partner_email,
             "first_name": self.partner_name,
             "reference": str(plit_reference[0]),
-            "lang": self.acquirer_id.epayco_checkout_lang,
+            "lang": self.provider_id.epayco_checkout_lang,
             "checkout_external": external,
             "test": test,
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
             "confirmation_url": urls.url_join(self.get_base_url(), EpaycoController._confirm_url),
-            'extra2': self.reference
+            "extra2": self.reference,
+            "ip":ip_address
         }
         return epayco_values
 
@@ -90,7 +95,7 @@ class PaymentTransaction(models.Model):
             )
 
         # Verify signature
-        sign_check = tx.acquirer_id._epayco_generate_sign(data, incoming=True)
+        sign_check = tx.provider_id._epayco_generate_sign(data, incoming=True)
         if sign_check != sign:
             raise ValidationError(
                 "Epayco: " + _(
@@ -106,22 +111,41 @@ class PaymentTransaction(models.Model):
         if self.provider != 'epayco':
             return
 
-        self.acquirer_reference = data.get('x_extra2')
+        self.provider_reference = data.get('x_extra2')
+        signature = data.get('x_signature')
         tx = self.search([('reference', '=', data.get('x_extra2')), ('provider', '=', 'epayco')])
+        shasign_check = self.acquirer_id._payco_generate_sign(signature, data)
+        x_approval_code = data.get('x_approval_code')
+        x_cod_transaction_state = data.get('x_cod_transaction_state')
         status = str(data.get('x_transaction_state'))
         state_message = data.get('x_response_reason_text')
+        validation = False
+        if float_compare(float(data.get('x_amount', '0.0')), tx.amount, 2) == 0:
+            if x_approval_code != "000000" and int(x_cod_transaction_state) == 1:
+                validation = True
+            else:
+                if int(x_cod_transaction_state) != 1:
+                    validation = True
+                else:
+                    validation = False
         print("========== payment ===========")
         print(status)
-        if status ==  'Pendiente':
-            print(state_message)
-            #self._set_pending(state_message=state_message)
-        if status == 'Aceptada':
-            self._set_done(state_message=state_message)
-        elif status in ('Rechazada', 'Abandonada', 'Cancelada', 'Expirada'):
-            self._set_canceled(state_message=state_message)
+        if shasign_check == True and validation == True:
+            if status == 'Pendiente':
+                self._set_pending(state_message=state_message)
+            if status == 'Aceptada':
+                self._set_done(state_message=state_message)
+            elif status in ('Rechazada', 'Abandonada', 'Cancelada', 'Expirada'):
+                self._set_canceled(state_message=state_message)
+            else:
+                _logger.warning(
+                    "received unrecognized payment state %s for transaction with reference %s",
+                    status, self.reference
+                )
+                self._set_error("Epayco: " + _("Invalid payment status."))
         else:
             _logger.warning(
-                "received unrecognized payment state %s for transaction with reference %s",
-                status, self.reference
+                "invalid signature for transaction with reference %s",
+                self.reference
             )
-            self._set_error("Epayco: " + _("Invalid payment status."))
+            self._set_error("Epayco: " + _("Invalid signature."))

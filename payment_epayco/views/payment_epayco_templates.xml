@@ -3,6 +3,7 @@
     <template id="redirect_form">
         <form t-att-action="api_url" method="post">
             <input type="hidden" name="public_key" t-att-value="public_key"/>
+            <input type="hidden" name="private_key" t-att-value="private_key"/>
             <input type="hidden" name="amount" t-att-value="amount"/>
             <input type="hidden" name="tax" t-att-value="tax"/>
             <input type="hidden" name="base_tax" t-att-value="base_tax"/>
@@ -16,6 +17,7 @@
             <input type="hidden" name="notify_url" t-att-value="confirmation_url"/>
             <input type="hidden" name="return_url" t-att-value="response_url"/>
             <input type="hidden" name="extra2" t-att-value="extra2"/>
+            <input type="hidden" name="ip" t-att-value="ip"/>
         </form>
     </template>
     <data noupdate="1">
@@ -29,34 +31,121 @@
                         <div class="loader">
                             <span class="sr-only">Loading...</span>
                         </div>
+                         <center>
+                            <a id="btn_epayco" href="#">
+                                <img src="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png" />
+                            </a>
+                         </center>
                         <div id="form-button-container">
                             <form>
-                                <script
-                                    src="https://checkout.epayco.co/checkout.js"
-                                    class="epayco-button"
-                                    t-att-data-epayco-key="public_key"
-                                    t-att-data-epayco-amount="amount"
-                                    t-att-data-epayco-tax="tax"
-                                    t-att-data-epayco-tax-base="base_tax"
-                                    t-att-data-epayco-currency="currency"
-                                    t-att-data-epayco-invoice="reference"
-                                    t-att-data-epayco-email-billing="email"
-                                    t-att-data-epayco-name-billing="firstname"
-                                    t-att-data-epayco-name="reference"
-                                    t-att-data-epayco-description="reference"
-                                    t-att-data-epayco-extra3="reference"
-                                    t-att-data-epayco-lang="lang"
-                                    t-att-data-epayco-external="checkout_external"
-                                    t-att-data-epayco-test="test"
-                                    t-att-data-epayco-response="return_url"
-                                    t-att-data-epayco-confirmation="notify_url"
-                                    t-att-data-epayco-extra2="extra2"
-                                    data-epayco-autoClick="true"
-                                    data-epayco-button="https://multimedia.epayco.co/epayco-landing/btns/Boton-epayco-color1.png"
-                                    >
+                                <input type="hidden" name="public_key" t-att-value="public_key"/>
+                                <input type="hidden" name="private_key" t-att-value="private_key"/>
+                                <input type="hidden" name="amount" t-att-value="amount"/>
+                                <input type="hidden" name="tax" t-att-value="tax"/>
+                                <input type="hidden" name="base_tax" t-att-value="base_tax"/>
+                                <input type="hidden" name="currency" t-att-value="currency"/>
+                                <input type="hidden" name="email" t-att-value="email"/>
+                                <input type="hidden" name="firstname" t-att-value="firstname"/>
+                                <input type="hidden" name="reference" t-att-value="reference"/>
+                                <input type="hidden" name="lang" t-att-value="lang"/>
+                                <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
+                                <input type="hidden" name="test" t-att-value="test"/>
+                                <input type="hidden" name="notify_url" t-att-value="confirmation_url"/>
+                                <input type="hidden" name="return_url" t-att-value="response_url"/>
+                                <input type="hidden" name="extra2" t-att-value="extra2"/>
+                                <input type="hidden" name="ip" t-att-value="ip"/>
+                                <script src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js">
                                 </script>
                                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
                                 <script xmlns="http://www.w3.org/1999/xhtml">
+                                    let public_key= document.getElementsByName("public_key")[0].value;
+                                    let private_key= document.getElementsByName("private_key")[0].value;
+                                    let amount= document.getElementsByName("amount")[0].value;
+                                    let tax= document.getElementsByName("tax")[0].value;
+                                    let base_tax= document.getElementsByName("base_tax")[0].value;
+                                    let currency= document.getElementsByName("currency")[0].value;
+                                    let email= document.getElementsByName("email")[0].value;
+                                    let firstname= document.getElementsByName("firstname")[0].value;
+                                    let reference= document.getElementsByName("reference")[0].value;
+                                    let lang= document.getElementsByName("lang")[0].value;
+                                    let checkout_external= document.getElementsByName("checkout_external")[0].value;
+                                    let test= document.getElementsByName("test")[0].value;
+                                    let notify_url= document.getElementsByName("notify_url")[0].value;
+                                    let return_url= document.getElementsByName("return_url")[0].value;
+                                    let extra2= document.getElementsByName("extra2")[0].value;
+                                    let ip= document.getElementsByName("ip")[0].value;
+                                    var data = {
+                                        name: reference,
+                                        description: reference,
+                                        invoice: reference,
+                                        currency: currency,
+                                        amount: amount.toString(),
+                                        tax_base: base_tax.toString(),
+                                        tax: tax.toString(),
+                                        taxIco: "0".toString(),
+                                        country: "CO",
+                                        lang: lang,
+                                        external: checkout_external,
+                                        extra2: extra2,
+                                        extra3: reference,
+                                        confirmation: notify_url,
+                                        response: return_url,
+                                        name_billing: firstname,
+                                        email_billing: email,
+                                        autoclick: "true",
+                                        ip: ip,
+                                        test: test.toString()
+                                    }
+                                    const apiKey = public_key;
+                                    const privateKey = private_key;
+                                    var openChekout = function () {
+                                          if(localStorage.getItem("invoicePayment") == null){
+                                           localStorage.setItem("invoicePayment", data.invoice);
+                                             makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                           }else{
+                                               if(localStorage.getItem("invoicePayment") != data.invoice){
+                                                   localStorage.removeItem("invoicePayment");
+                                                   localStorage.setItem("invoicePayment", data.invoice);
+                                                     makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                               }else{
+                                                    makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                               }
+                                           }
+                                    }
+                                    var makePayment = function (privatekey, apikey, info, external) {
+                                        const headers = { "Content-Type": "application/json" } ;
+                                        headers["privatekey"] = privatekey;
+                                        headers["apikey"] = apikey;
+                                        var payment =   function (){
+                                            return  fetch("https://cms.epayco.io/checkout/payment/session", {
+                                                method: "POST",
+                                                body: JSON.stringify(info),
+                                                headers
+                                            })
+                                                .then(res =>  res.json())
+                                                .catch(err => err);
+                                        }
+                                        payment()
+                                            .then(session => {
+                                                if(session.data.sessionId != undefined){
+                                                    localStorage.removeItem("sessionPayment");
+                                                    localStorage.setItem("sessionPayment", session.data.sessionId);
+                                                    const handlerNew = window.ePayco.checkout.configure({
+                                                        sessionId: session.data.sessionId,
+                                                        external: external,
+                                                    });
+                                                    handlerNew.openNew()
+                                                }
+                                            })
+                                            .catch(error => {
+                                                error.message;
+                                            });
+                                    }
+                                    debugger
+                                    var bntPagar = document.getElementById("btn_epayco");
+                                    bntPagar.addEventListener("click", openChekout);
+                                    openChekout()
+
                                     window.onload = function() {
                                     document.addEventListener("contextmenu", function(e){
                                             e.preventDefault();
