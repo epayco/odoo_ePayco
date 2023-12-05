@@ -58,13 +58,13 @@ class PaymentTransaction(models.Model):
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
             "confirmation_url": urls.url_join(self.get_base_url(), EpaycoController._confirm_url),
             "extra2": self.reference,
-            "ip": ip_address
+            "ip": "181.132.179.115"
         }
         return epayco_values
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         tx = super()._get_tx_from_notification_data(provider_code, notification_data)
-        if provider_code != 'epayco':
+        if provider_code != 'epayco' or len(tx) == 1:
             return tx
 
         reference = notification_data.get('x_extra2')
@@ -77,7 +77,7 @@ class PaymentTransaction(models.Model):
                 )
             )
 
-        tx = self.search([('reference', '=', reference), ('provider', '=', 'epayco')])
+        tx = self.search([('reference', '=', reference), ('provider_code', '=', 'epayco')])
         if not tx:
             raise ValidationError(
                 "Epayco: " + _("No transaction found matching reference %s.", reference)
@@ -97,13 +97,13 @@ class PaymentTransaction(models.Model):
 
     def _process_notification_data(self, notification_data):
         super()._process_notification_data(notification_data)
-        if self.provider != 'epayco':
+        if self.provider_code != 'epayco':
             return
 
         self.provider_reference = notification_data.get('x_extra2')
         signature = notification_data.get('x_signature')
-        tx = self.search([('reference', '=', notification_data.get('x_extra2')), ('provider', '=', 'epayco')])
-        shasign_check = self.acquirer_id._payco_generate_sign(signature, notification_data)
+        tx = self.search([('reference', '=', notification_data.get('x_extra2')), ('provider_code', '=', 'epayco')])
+        shasign_check = tx.provider_id._epayco_generate_sign(notification_data, incoming=True)
         x_approval_code = notification_data.get('x_approval_code')
         x_cod_transaction_state = notification_data.get('x_cod_transaction_state')
         status = str(notification_data.get('x_transaction_state'))
@@ -117,7 +117,8 @@ class PaymentTransaction(models.Model):
                     validation = True
                 else:
                     validation = False
-        if shasign_check == True and validation == True:
+
+        if shasign_check == signature and validation == True:
             if status == 'Pendiente':
                 self._set_pending(state_message=state_message)
             if status == 'Aceptada':
