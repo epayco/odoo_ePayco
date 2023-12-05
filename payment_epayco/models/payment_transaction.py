@@ -119,18 +119,12 @@ class PaymentTransaction(models.Model):
                     validation = False
 
         if shasign_check == signature and validation == True:
-            if status == 'Pendiente':
-                self._set_pending(state_message=state_message)
-            if status == 'Aceptada':
+            if int(x_cod_transaction_state) == 3:
+                self._set_pending()
+            if int(x_cod_transaction_state) == 1:
                 self._set_done(state_message=state_message)
-            elif status in ('Rechazada', 'Abandonada', 'Cancelada', 'Expirada'):
+            if int(x_cod_transaction_state) in (2,4,6,10,11):
                 self._set_canceled(state_message=state_message)
-            else:
-                _logger.warning(
-                    "received unrecognized payment state %s for transaction with reference %s",
-                    status, self.reference
-                )
-                self._set_error("Epayco: " + _("Invalid payment status."))
         else:
             _logger.warning(
                 "invalid signature for transaction with reference %s",
