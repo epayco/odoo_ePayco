@@ -21,16 +21,6 @@ _logger = logging.getLogger(__name__)
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    @api.model
-    def _compute_reference(self, provider, prefix=None, separator='-', **kwargs):
-        if provider == 'epayco':
-            if not prefix:
-                prefix = self.sudo()._compute_reference_prefix(
-                    provider, separator, **kwargs
-                ) or None
-            prefix = payment_utils.singularize_reference_prefix(prefix=prefix, separator=separator)
-        return super()._compute_reference(provider, prefix=prefix, separator=separator, **kwargs)
-
     def _get_specific_rendering_values(self, processing_values):
         res = super()._get_specific_rendering_values(processing_values)
         if self.provider_code != 'epayco':
@@ -68,18 +58,17 @@ class PaymentTransaction(models.Model):
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
             "confirmation_url": urls.url_join(self.get_base_url(), EpaycoController._confirm_url),
             "extra2": self.reference,
-            "ip":ip_address
+            "ip": ip_address
         }
         return epayco_values
 
-    @api.model
-    def _get_tx_from_feedback_data(self, provider, data):
-        tx = super()._get_tx_from_feedback_data(provider, data)
-        if provider != 'epayco':
+    def _get_tx_from_notification_data(self, provider_code, notification_data):
+        tx = super()._get_tx_from_notification_data(provider_code, notification_data)
+        if provider_code != 'epayco':
             return tx
 
-        reference = data.get('x_extra2')
-        sign = data.get('x_signature')
+        reference = notification_data.get('x_extra2')
+        sign = notification_data.get('x_signature')
         if not reference or not sign:
             raise ValidationError(
                 "Epayco: " + _(
@@ -95,7 +84,7 @@ class PaymentTransaction(models.Model):
             )
 
         # Verify signature
-        sign_check = tx.provider_id._epayco_generate_sign(data, incoming=True)
+        sign_check = tx.provider_id._epayco_generate_sign(notification_data, incoming=True)
         if sign_check != sign:
             raise ValidationError(
                 "Epayco: " + _(
@@ -106,21 +95,21 @@ class PaymentTransaction(models.Model):
 
         return tx
 
-    def _process_feedback_data(self, data):
-        super()._process_feedback_data(data)
+    def _process_notification_data(self, notification_data):
+        super()._process_notification_data(notification_data)
         if self.provider != 'epayco':
             return
 
-        self.provider_reference = data.get('x_extra2')
-        signature = data.get('x_signature')
-        tx = self.search([('reference', '=', data.get('x_extra2')), ('provider', '=', 'epayco')])
-        shasign_check = self.acquirer_id._payco_generate_sign(signature, data)
-        x_approval_code = data.get('x_approval_code')
-        x_cod_transaction_state = data.get('x_cod_transaction_state')
-        status = str(data.get('x_transaction_state'))
-        state_message = data.get('x_response_reason_text')
+        self.provider_reference = notification_data.get('x_extra2')
+        signature = notification_data.get('x_signature')
+        tx = self.search([('reference', '=', notification_data.get('x_extra2')), ('provider', '=', 'epayco')])
+        shasign_check = self.acquirer_id._payco_generate_sign(signature, notification_data)
+        x_approval_code = notification_data.get('x_approval_code')
+        x_cod_transaction_state = notification_data.get('x_cod_transaction_state')
+        status = str(notification_data.get('x_transaction_state'))
+        state_message = notification_data.get('x_response_reason_text')
         validation = False
-        if float_compare(float(data.get('x_amount', '0.0')), tx.amount, 2) == 0:
+        if float_compare(float(notification_data.get('x_amount', '0.0')), tx.amount, 2) == 0:
             if x_approval_code != "000000" and int(x_cod_transaction_state) == 1:
                 validation = True
             else:
@@ -128,8 +117,6 @@ class PaymentTransaction(models.Model):
                     validation = True
                 else:
                     validation = False
-        print("========== payment ===========")
-        print(status)
         if shasign_check == True and validation == True:
             if status == 'Pendiente':
                 self._set_pending(state_message=state_message)

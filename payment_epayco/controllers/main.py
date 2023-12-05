@@ -40,26 +40,23 @@ class EpaycoController(http.Controller):
             url = 'https://secure.epayco.io/validation/v1/reference/%s' % (
                 ref_epayco)
             response = requests.get(url)
-            print("ePayco ref_payco")
-            print("================= response =======================")
-            print(response)
             if response.status_code == 200:
                 data = response.json().get('data')
-                print("================= data =======================")
-                print(data)
                 if int(data.get('x_cod_response')) not in [1, 3]:
                     return request.redirect('/shop/payment')
                 else:
-                    request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
+                    tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                        'epayco', data
+                    )
+                    tx_sudo._handle_notification_data('epayco', data)
                     return request.redirect('/payment/status')
             else:
                 return request.redirect('/shop/payment')
         else:
-            print("ePayco ref_payco")
-            print("================== confirmation ======================")
-            print("================= data =======================")
-            print(data)
-            request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
+            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                'epayco', data
+            )
+            tx_sudo._handle_notification_data('epayco', data)
             return Response(status=200)
 
 

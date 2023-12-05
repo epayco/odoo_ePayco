@@ -4,7 +4,7 @@
     'name': 'Payment Provider: Epayco',
     'version': '1.0',
     'category': 'Accounting/Payment Providers',
-    'sequence': 100,
+    'sequence': 350,
     'summary': 'Payment Provider: ePayco Implementation',
     'description': """ePayco Payment Provider""",
     'author': "ePayco",

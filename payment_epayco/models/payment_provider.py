@@ -3,7 +3,6 @@
 import hashlib
 
 from odoo import api, fields, models
-from odoo.tools.float_utils import float_repr
 
 SUPPORTED_CURRENCIES = ('COP','USD')
 
@@ -68,9 +67,3 @@ class PaymentProvider(models.Model):
             hash_object = hashlib.sha256(hash_str_bytes)
             hash = hash_object.hexdigest()
         return hash
-
-    def _get_default_payment_method_id(self):
-        self.ensure_one()
-        if self.provider != 'epayco':
-            return super()._get_default_payment_method_id()
-        return self.env.ref('payment_epayco.payment_method_epayco').id

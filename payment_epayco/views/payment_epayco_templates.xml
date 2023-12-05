@@ -50,8 +50,8 @@
                                 <input type="hidden" name="lang" t-att-value="lang"/>
                                 <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
                                 <input type="hidden" name="test" t-att-value="test"/>
-                                <input type="hidden" name="notify_url" t-att-value="confirmation_url"/>
-                                <input type="hidden" name="return_url" t-att-value="response_url"/>
+                                <input type="hidden" name="notify_url" t-att-value="notify_url"/>
+                                <input type="hidden" name="return_url" t-att-value="return_url"/>
                                 <input type="hidden" name="extra2" t-att-value="extra2"/>
                                 <input type="hidden" name="ip" t-att-value="ip"/>
                                 <script src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js">
@@ -74,6 +74,7 @@
                                     let return_url= document.getElementsByName("return_url")[0].value;
                                     let extra2= document.getElementsByName("extra2")[0].value;
                                     let ip= document.getElementsByName("ip")[0].value;
+                                    var checkout_lang = lang == "es_CO" ? "es":"en";
                                     var data = {
                                         name: reference,
                                         description: reference,
