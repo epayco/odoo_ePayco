@@ -10,7 +10,7 @@ from werkzeug import urls
 from odoo import _, api, models, http
 from odoo.http import request
 from odoo.exceptions import ValidationError
-from odoo.tools.float_utils import float_repr,float_compare
+from odoo.tools.float_utils import float_repr, float_compare
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment_epayco.controllers.main import EpaycoController
@@ -28,19 +28,19 @@ class PaymentTransaction(models.Model):
 
         api_url = EpaycoController._proccess_url
         plit_reference = self.reference.split('-')
-        sql = """select amount_tax from sale_order where name = '%s'
-                """ % (plit_reference[0])
-        http.request.cr.execute(sql)
-        result = http.request.cr.fetchall() or []
-        amount_tax = 0
         tax = 0
-        if result:
-            (amount_tax) = result[0]
-        for tax_amount in range(amount_tax):
-            tax = tax_amount
+        is_tax = self.get_tax('sale_order', plit_reference[0])
+        if is_tax:
+            tax = is_tax
+        else:
+            is_tax = self.get_tax('account_move', plit_reference[0])
+            if is_tax:
+                tax = is_tax
+
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
-        base_tax = float(float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2))-float(tax))
+        base_tax = float(
+            float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2)) - float(tax))
         external = 'true' if self.provider_id.epayco_checkout_type == 'standard' else 'false'
         test = 'true' if self.provider_id.state == 'test' else 'false'
         epayco_values = {
@@ -125,7 +125,7 @@ class PaymentTransaction(models.Model):
                 self._set_pending()
             if int(x_cod_transaction_state) == 1:
                 self._set_done(state_message=state_message)
-            if int(x_cod_transaction_state) in (2,4,6,10,11):
+            if int(x_cod_transaction_state) in (2, 4, 6, 10, 11):
                 self._set_canceled(state_message=state_message)
         else:
             _logger.warning(
@@ -133,3 +133,18 @@ class PaymentTransaction(models.Model):
                 self.reference
             )
             self._set_error("Epayco: " + _("Invalid signature."))
+
+    def get_tax(self, table, name):
+        sql = """select amount_tax from %s where name = '%s'
+                        """ % (table, name)
+        http.request.cr.execute(sql)
+        result = http.request.cr.fetchall() or []
+        amount_tax = 0
+        tax = 0
+        if result:
+            (amount_tax) = result[0]
+            if len(amount_tax) > 0:
+                for tax_amount in amount_tax:
+                    tax = tax_amount
+
+        return tax

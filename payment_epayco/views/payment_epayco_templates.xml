@@ -47,7 +47,7 @@
                                 <input type="hidden" name="email" t-att-value="email"/>
                                 <input type="hidden" name="firstname" t-att-value="firstname"/>
                                 <input type="hidden" name="reference" t-att-value="reference"/>
-                                <input type="hidden" name="lang" t-att-value="lang_checkout"/>
+                                <input type="hidden" name="lang_checkout" t-att-value="lang_checkout"/>
                                 <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
                                 <input type="hidden" name="test" t-att-value="test"/>
                                 <input type="hidden" name="notify_url" t-att-value="notify_url"/>
@@ -67,7 +67,7 @@
                                     let email= document.getElementsByName("email")[0].value;
                                     let firstname= document.getElementsByName("firstname")[0].value;
                                     let reference= document.getElementsByName("reference")[0].value;
-                                    let lang= document.getElementsByName("lang")[0].value;
+                                    let lang= document.getElementsByName("lang_checkout")[0].value;
                                     let checkout_external= document.getElementsByName("checkout_external")[0].value;
                                     let test= document.getElementsByName("test")[0].value;
                                     let notify_url= document.getElementsByName("notify_url")[0].value;
@@ -142,11 +142,9 @@
                                                 error.message;
                                             });
                                     }
-                                    debugger
                                     var bntPagar = document.getElementById("btn_epayco");
                                     bntPagar.addEventListener("click", openChekout);
                                     openChekout()
-
                                     window.onload = function() {
                                     document.addEventListener("contextmenu", function(e){
                                             e.preventDefault();
