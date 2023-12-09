@@ -58,7 +58,7 @@ class PaymentTransaction(models.Model):
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
             "confirmation_url": urls.url_join(self.get_base_url(), EpaycoController._confirm_url),
             "extra2": self.reference,
-            "ip": "181.132.179.115"
+            "ip": ip_address
         }
         return epayco_values
 
