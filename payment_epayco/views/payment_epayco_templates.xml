@@ -11,7 +11,7 @@
             <input type="hidden" name="email" t-att-value="email"/>
             <input type="hidden" name="firstname" t-att-value="firstname"/>
             <input type="hidden" name="reference" t-att-value="reference"/>
-            <input type="hidden" name="lang" t-att-value="lang"/>
+            <input type="hidden" name="lang_checkout" t-att-value="lang_checkout"/>
             <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
             <input type="hidden" name="test" t-att-value="test"/>
             <input type="hidden" name="notify_url" t-att-value="confirmation_url"/>
@@ -47,7 +47,7 @@
                                 <input type="hidden" name="email" t-att-value="email"/>
                                 <input type="hidden" name="firstname" t-att-value="firstname"/>
                                 <input type="hidden" name="reference" t-att-value="reference"/>
-                                <input type="hidden" name="lang" t-att-value="lang"/>
+                                <input type="hidden" name="lang" t-att-value="lang_checkout"/>
                                 <input type="hidden" name="checkout_external" t-att-value="checkout_external"/>
                                 <input type="hidden" name="test" t-att-value="test"/>
                                 <input type="hidden" name="notify_url" t-att-value="notify_url"/>

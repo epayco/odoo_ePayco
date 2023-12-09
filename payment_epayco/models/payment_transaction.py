@@ -32,9 +32,11 @@ class PaymentTransaction(models.Model):
                 """ % (plit_reference[0])
         http.request.cr.execute(sql)
         result = http.request.cr.fetchall() or []
+        amount_tax = 0
+        tax = 0
         if result:
             (amount_tax) = result[0]
-        for tax_amount in amount_tax:
+        for tax_amount in range(amount_tax):
             tax = tax_amount
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
@@ -52,7 +54,7 @@ class PaymentTransaction(models.Model):
             "email": self.partner_email,
             "first_name": self.partner_name,
             "reference": str(plit_reference[0]),
-            "lang": self.provider_id.epayco_checkout_lang,
+            "lang_checkout": self.provider_id.epayco_checkout_lang,
             "checkout_external": external,
             "test": test,
             "response_url": urls.url_join(self.get_base_url(), EpaycoController._return_url),
