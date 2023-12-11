@@ -2,20 +2,11 @@
 
 import logging
 import sys
-from pprint import pprint
 
-from odoo.fields import Command
-
-from requests.exceptions import ConnectionError, HTTPError
-from werkzeug import urls
 import requests
 from odoo import _, http
-from odoo.exceptions import ValidationError
 from odoo.http import request, Response
-from odoo.addons.payment.controllers import portal as payment_portal
-from odoo.addons.payment.controllers.post_processing import PaymentPostProcessing
 
-import json
 _logger = logging.getLogger(__name__)
 
 class EpaycoController(http.Controller):
@@ -23,20 +14,20 @@ class EpaycoController(http.Controller):
     _confirm_url = '/payment/epayco/confirm'
     _proccess_url = '/payment/epayco/checkout'
 
-    @http.route(['/payment/epayco/checkout'], type='http', auth='public', website=True, csrf=False, save_session=False)
+    @http.route(_proccess_url, type='http', auth='public', methods=['GET', 'POST'], website=True, csrf=False, save_session=False)
     def epayco_checkout(self, **post):
         """ Epayco."""
         print(post)
         return request.render('payment_epayco.proccess', post)
 
     @http.route(
-        _confirm_url, type='http', auth='public', methods=['POST'], csrf=False
+        _confirm_url, type='http', auth='public', methods=['POST'],  website=True, csrf=False, save_session=False
     )
     def epayco_backend_confirm(self, **post):
         return self._epayco_process_response(post,confirmation=True)
 
     @http.route(
-        _return_url, type='http', auth='public', website=True, csrf=False, save_session=False
+        _return_url,  type='http', auth='public', methods=['GET'],  website=True, csrf=False, save_session=False
     )
     def epayco_backend_redirec(self, **post):
         return self._epayco_process_response(post)
@@ -46,23 +37,26 @@ class EpaycoController(http.Controller):
             ref_epayco = data.get('ref_payco')
             if ref_epayco is None:
                 return request.redirect('/shop/payment')
-            url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
+            url = 'https://secure.epayco.io/validation/v1/reference/%s' % (
                 ref_epayco)
             response = requests.get(url)
-            print("ePayco ref_payco")
-            print("================= response =======================")
-            print(response)
             if response.status_code == 200:
                 data = response.json().get('data')
-                
-                request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
-                return request.redirect('/payment/status')
+                if int(data.get('x_cod_response')) not in [1, 3]:
+                    return request.redirect('/shop/payment')
+                else:
+                    tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                        'epayco', data
+                    )
+                    tx_sudo._handle_notification_data('epayco', data)
+                    return request.redirect('/payment/status')
             else:
                 return request.redirect('/shop/payment')
         else:
-            print("ePayco ref_payco")
-            print("================== confirmation ======================")
-            request.env['payment.transaction'].sudo()._handle_feedback_data('epayco', data)
+            tx_sudo = request.env['payment.transaction'].sudo()._get_tx_from_notification_data(
+                'epayco', data
+            )
+            tx_sudo._handle_notification_data('epayco', data)
             return Response(status=200)
 
 

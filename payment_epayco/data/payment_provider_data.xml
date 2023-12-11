@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="payment_provider_epayco" model="payment.provider">
+        <field name="name">ePayco</field>
+        <field name="display_as">ePayco</field>
+        <field name="image_128" type="base64" file="payment_epayco/static/src/img/epayco_icon.png"/>
+        <field name="module_id" ref="base.module_payment_epayco"/>
+        <field name="code">epayco</field>
+        <field name="redirect_form_view_id"  ref="redirect_form" />
+    </record>
+</odoo>
