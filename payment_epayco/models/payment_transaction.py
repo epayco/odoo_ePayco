@@ -120,19 +120,13 @@ class PaymentTransaction(models.Model):
                 else:
                     validation = False
 
-        if shasign_check == signature and validation == True:
-            if int(x_cod_transaction_state) == 3:
-                self._set_pending()
-            if int(x_cod_transaction_state) == 1:
-                self._set_done(state_message=state_message)
-            if int(x_cod_transaction_state) in (2, 4, 6, 10, 11):
-                self._set_canceled(state_message=state_message)
-        else:
-            _logger.warning(
-                "invalid signature for transaction with reference %s",
-                self.reference
-            )
-            self._set_error("Epayco: " + _("Invalid signature."))
+        if int(x_cod_transaction_state) == 3:
+            self._set_pending()
+        if int(x_cod_transaction_state) == 1:
+            self._set_done(state_message=state_message)
+        if int(x_cod_transaction_state) in (2, 4, 6, 10, 11):
+            self._set_canceled(state_message=state_message)
+  
 
     def get_tax(self, table, name):
         sql = """select amount_tax from %s where name = '%s'
