@@ -37,10 +37,6 @@ class PaymentTransaction(models.Model):
 
         api_url = EpaycoController._proccess_url
         plit_reference = self.reference.split('-')
-        sql = """select amount_tax from sale_order where name = '%s'
-                """ % (plit_reference[0])
-        http.request.cr.execute(sql)
-        result = http.request.cr.fetchall() or []
         tax = 0
         is_tax = self.get_tax('sale_order', plit_reference[0])
         if is_tax:
