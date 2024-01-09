@@ -41,10 +41,14 @@ class PaymentTransaction(models.Model):
                 """ % (plit_reference[0])
         http.request.cr.execute(sql)
         result = http.request.cr.fetchall() or []
-        if result:
-            (amount_tax) = result[0]
-        for tax_amount in amount_tax:
-            tax = tax_amount
+        tax = 0
+        is_tax = self.get_tax('sale_order', plit_reference[0])
+        if is_tax:
+            tax = is_tax
+        else:
+            is_tax = self.get_tax('account_move', plit_reference[0])
+            if is_tax:
+                tax = is_tax
         base_tax = float(float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2))-float(tax))
         external = 'true' if self.acquirer_id.epayco_checkout_type == 'standard' else 'false'
         test = 'true' if self.acquirer_id.state == 'test' else 'false'
@@ -125,3 +129,18 @@ class PaymentTransaction(models.Model):
                 status, self.reference
             )
             self._set_error("Epayco: " + _("Invalid payment status."))
+
+    def get_tax(self, table, name):
+        sql = """select amount_tax from %s where name = '%s'
+                        """ % (table, name)
+        http.request.cr.execute(sql)
+        result = http.request.cr.fetchall() or []
+        amount_tax = 0
+        tax = 0
+        if result:
+            (amount_tax) = result[0]
+            if len(amount_tax) > 0:
+                for tax_amount in amount_tax:
+                    tax = tax_amount
+
+        return tax
