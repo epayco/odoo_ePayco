@@ -37,7 +37,7 @@ class EpaycoController(http.Controller):
             ref_epayco = data.get('ref_payco')
             if ref_epayco is None:
                 return request.redirect('/shop/payment')
-            url = 'https://secure.epayco.io/validation/v1/reference/%s' % (
+            url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
                 ref_epayco)
             response = requests.get(url)
             if response.status_code == 200:
