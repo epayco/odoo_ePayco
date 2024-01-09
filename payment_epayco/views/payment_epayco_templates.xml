@@ -54,7 +54,7 @@
                                 <input type="hidden" name="return_url" t-att-value="return_url"/>
                                 <input type="hidden" name="extra2" t-att-value="extra2"/>
                                 <input type="hidden" name="ip" t-att-value="ip"/>
-                                <script src="https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js">
+                                <script src="https://checkout.epayco.co/checkout.js">
                                 </script>
                                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
                                 <script xmlns="http://www.w3.org/1999/xhtml">
