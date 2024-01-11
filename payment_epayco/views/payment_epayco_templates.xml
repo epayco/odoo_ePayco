@@ -75,6 +75,10 @@
                                     let extra2= document.getElementsByName("extra2")[0].value;
                                     let ip= document.getElementsByName("ip")[0].value;
                                     var checkout_lang = lang == "es_CO" ? "es":"en";
+                                    var handler = ePayco.checkout.configure({
+                                        key: public_key,
+                                        test: test.toString()
+                                    })
                                     var data = {
                                         name: reference,
                                         description: reference,
@@ -92,26 +96,12 @@
                                         confirmation: notify_url,
                                         response: return_url,
                                         name_billing: firstname,
-                                        email_billing: email,
-                                        autoclick: "true",
-                                        ip: ip,
-                                        test: test.toString()
+                                        email_billing: email
                                     }
                                     const apiKey = public_key;
                                     const privateKey = private_key;
                                     var openChekout = function () {
-                                          if(localStorage.getItem("invoicePayment") == null){
-                                           localStorage.setItem("invoicePayment", data.invoice);
-                                             makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
-                                           }else{
-                                               if(localStorage.getItem("invoicePayment") != data.invoice){
-                                                   localStorage.removeItem("invoicePayment");
-                                                   localStorage.setItem("invoicePayment", data.invoice);
-                                                     makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
-                                               }else{
-                                                    makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
-                                               }
-                                           }
+                                          handler.open(data);
                                     }
                                     var makePayment = function (privatekey, apikey, info, external) {
                                         const headers = { "Content-Type": "application/json" } ;
