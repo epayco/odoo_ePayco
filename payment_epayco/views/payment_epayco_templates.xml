@@ -96,19 +96,33 @@
                                         confirmation: notify_url,
                                         response: return_url,
                                         name_billing: firstname,
-                                        email_billing: email
+                                        email_billing: email,
+                                        autoclick: "true",
+                                        ip: ip,
+                                        test: test.toString()
                                     }
                                     const apiKey = public_key;
                                     const privateKey = private_key;
                                     var openChekout = function () {
-                                          handler.open(data);
+                                        if(localStorage.getItem("invoicePayment") == null){
+                                            localStorage.setItem("invoicePayment", data.invoice);
+                                            makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                        }else{
+                                            if(localStorage.getItem("invoicePayment") != data.invoice){
+                                                localStorage.removeItem("invoicePayment");
+                                                localStorage.setItem("invoicePayment", data.invoice);
+                                                makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                            }else{
+                                                makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                            }
+                                        }
                                     }
                                     var makePayment = function (privatekey, apikey, info, external) {
                                         const headers = { "Content-Type": "application/json" } ;
                                         headers["privatekey"] = privatekey;
                                         headers["apikey"] = apikey;
                                         var payment =   function (){
-                                            return  fetch("https://cms.epayco.io/checkout/payment/session", {
+                                            return  fetch("https://cms.epayco.co/checkout/payment/session", {
                                                 method: "POST",
                                                 body: JSON.stringify(info),
                                                 headers
