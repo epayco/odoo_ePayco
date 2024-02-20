@@ -44,7 +44,7 @@ class PaycoController(http.Controller):
             if ref_payco is None:
                 _logger.debug('User error in ePayco checkout: %s', data)
                 return werkzeug.utils.redirect('/shop/payment')
-            url = 'https://secure.epayco.io/validation/v1/reference/%s' % (
+            url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
                 ref_payco)
             response = requests.get(url)
             if response.status_code == 200:
