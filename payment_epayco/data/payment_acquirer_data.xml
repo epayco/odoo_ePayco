@@ -17,7 +17,7 @@
                 </ul>
             </field>
             <field name="pre_msg"><![CDATA[
-                <p>You will be redirected to the ePayco website after clicking on the payment button.</p>]]>
+                ]]>
             </field>
             <field name="payco_merchant_key">dummy</field>
             <field name="payco_merchant_salt">dummy</field>

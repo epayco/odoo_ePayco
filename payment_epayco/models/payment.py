@@ -9,9 +9,10 @@ from re import S
 import uuid
 from werkzeug import urls
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, http, _
+from odoo.http import request
 from odoo.addons.payment.models.payment_acquirer import ValidationError
-from odoo.tools.float_utils import float_compare
+from odoo.tools.float_utils import float_compare, float_repr, float_round
 
 import logging
 
@@ -81,17 +82,27 @@ class PaymentAcquirerPayco(models.Model):
         payco_tx_values = dict(values)
         split_reference = payco_tx_values.get('reference').split('-')
         order = ''
-        tax = values['partner'].last_website_so_id.amount_tax
-        base_tax = values['partner'].last_website_so_id.amount_undiscounted
-        amount = values['partner'].last_website_so_id.amount_total
+        tax = 0
+        is_tax = self.get_tax('sale_order', split_reference[0])
+        if is_tax:
+            tax = is_tax
+        else:
+            is_tax = self.get_tax('account_move', split_reference[0])
+            if is_tax:
+                tax = is_tax
+        base_tax = float(float_round(values['amount'], 2))-float(float_round(tax, 2))
+        amount = float(float_round(values['amount'], 2))
+        #tax = values['partner'].last_website_so_id.amount_tax
+        #base_tax = values['partner'].last_website_so_id.amount_undiscounted
+        #amount = values['partner'].last_website_so_id.amount_total
         if split_reference:
             order = split_reference[0]
         payco_tx_values.update({
             'public_key': self.payco_merchant_salt,
             'txnid': order,
-            'amount': amount,
-            'tax': tax,
-            'base_tax': base_tax,
+            "amount": str(amount),
+            "tax": str(tax),
+            'base_tax': str(base_tax),
             'productinfo': tx.reference,
             'firstname': values.get('partner_name'),
             'email': values.get('partner_email'),
@@ -108,6 +119,21 @@ class PaymentAcquirerPayco(models.Model):
             'extra3': test
         })
         return payco_tx_values
+
+    def get_tax(self, table, name):
+        sql = """select amount_tax from %s where name = '%s'
+                        """ % (table, name)
+        http.request.cr.execute(sql)
+        result = http.request.cr.fetchall() or []
+        amount_tax = 0
+        tax = 0
+        if result:
+            (amount_tax) = result[0]
+            if len(amount_tax) > 0:
+                for tax_amount in amount_tax:
+                    tax = tax_amount
+
+        return tax
 
     def payco_get_form_action_url(self):
         self.ensure_one()
