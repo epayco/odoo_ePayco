@@ -79,6 +79,9 @@
                                         key: public_key,
                                         test: test.toString()
                                     })
+                                    var extras_epayco = {
+                                        extra5:"P32"
+                                    }
                                     var data = {
                                         name: reference,
                                         description: reference,
@@ -96,19 +99,34 @@
                                         confirmation: notify_url,
                                         response: return_url,
                                         name_billing: firstname,
-                                        email_billing: email
+                                        email_billing: email,
+                                        extras_epayco: extras_epayco,
+                                        test: test.toString(),
+                                        autoclick: "true",
+                                        ip: ip
                                     }
                                     const apiKey = public_key;
                                     const privateKey = private_key;
-                                    var openChekout = function () {
-                                          handler.open(data);
+                                    var openNewChekout = function () {
+                                        if(localStorage.getItem("invoicePayment") == null){
+                                            localStorage.setItem("invoicePayment", data.invoice);
+                                            makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                        }else{
+                                            if(localStorage.getItem("invoicePayment") != data.invoice){
+                                                localStorage.removeItem("invoicePayment");
+                                                localStorage.setItem("invoicePayment", data.invoice);
+                                                makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                            }else{
+                                                makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
+                                            }
+                                        }
                                     }
                                     var makePayment = function (privatekey, apikey, info, external) {
                                         const headers = { "Content-Type": "application/json" } ;
                                         headers["privatekey"] = privatekey;
                                         headers["apikey"] = apikey;
                                         var payment =   function (){
-                                            return  fetch("https://cms.epayco.io/checkout/payment/session", {
+                                            return  fetch("https://cms.epayco.co/checkout/payment/session", {
                                                 method: "POST",
                                                 body: JSON.stringify(info),
                                                 headers
@@ -126,11 +144,16 @@
                                                         external: external,
                                                     });
                                                     handlerNew.openNew()
+                                                }else{
+                                                    handler.open(data);
                                                 }
                                             })
                                             .catch(error => {
                                                 error.message;
                                             });
+                                    }
+                                    var openChekout = function () {
+                                        openNewChekout()
                                     }
                                     var bntPagar = document.getElementById("btn_epayco");
                                     bntPagar.addEventListener("click", openChekout);
