@@ -59,20 +59,6 @@ class PaymentProvider(models.Model):
 
         return providers
 
-    def _epayco_get_api_url(self, api_key):
-        self.ensure_one()
-
-        if self.state == 'enabled':
-            api_urls = {
-                'hosted_payment_page': 'https://secure.epayco.com/ncol/prod/orderstandard_utf8.asp',
-                'directlink': 'https://secure.ogone.com/ncol/prod/orderdirect_utf8.asp',
-            }
-        else:  # 'test'
-            api_urls = {
-                'hosted_payment_page': 'https://ogone.test.v-psp.com/ncol/test/orderstandard_utf8.asp',
-                'directlink': 'https://ogone.test.v-psp.com/ncol/test/orderdirect_utf8.asp',
-            }
-        return api_urls.get(api_key)
 
     def _epayco_generate_signature(self, values, incoming=True, format_keys=False):
 
@@ -90,20 +76,7 @@ class PaymentProvider(models.Model):
         shasign.update(signing_string.encode())
         return shasign.hexdigest()
 
-    def _epayco_make_request(self, payload=None, method='POST'):
-        self.ensure_one()
-
-        url = self._epayco_get_api_url('directlink')
-        try:
-            response = requests.request(method, url, data=payload, timeout=60)
-            response.raise_for_status()
-        except requests.exceptions.ConnectionError:
-            _logger.exception("unable to reach endpoint at %s", url)
-            raise ValidationError("epayco: " + _("Could not establish the connection to the API."))
-        except requests.exceptions.HTTPError:
-            _logger.exception("invalid API request at %s with data %s", url, payload)
-            raise ValidationError("epayco: " + _("The communication with the API failed."))
-        return response.content
+    
 
     def _get_default_payment_method_codes(self):
         """ Override of `payment` to return the default payment method codes. """
