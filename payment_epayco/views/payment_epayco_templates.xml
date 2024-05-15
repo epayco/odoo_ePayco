@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <template id="redirect_form">
         <form t-att-action="api_url" method="post">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <input type="hidden" name="public_key" t-att-value="public_key"/>
             <input type="hidden" name="private_key" t-att-value="private_key"/>
             <input type="hidden" name="amount" t-att-value="amount"/>
@@ -18,6 +20,15 @@
             <input type="hidden" name="return_url" t-att-value="response_url"/>
             <input type="hidden" name="extra2" t-att-value="extra2"/>
             <input type="hidden" name="ip" t-att-value="ip"/>
+            <input type="hidden" name="total" t-att-value="total"/>
+            <input type="hidden" name="language" t-att-value="language"/>
+            <input type="hidden" name="PM" t-att-value="PM"/>
+            <input type="hidden" name="url" t-att-value="url"/>
+            <input type="hidden" name="cellphone" t-att-value="cellphone"/>
+            <input type="hidden" name="country" t-att-value="country"/>
+            <input type="hidden" name="city" t-att-value="city"/>
+            <input type="hidden" name="zip" t-att-value="zip"/>
+            <input type="hidden" name="address" t-att-value="address"/>
         </form>
     </template>
     <data noupdate="1">
@@ -159,4 +170,5 @@
           </t>
         </template>
     </data>
+
 </odoo>

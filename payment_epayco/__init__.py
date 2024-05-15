@@ -3,12 +3,13 @@
 from . import controllers
 from . import models
 
+from odoo.exceptions import UserError
+from odoo.tools import config
+
 from odoo.addons.payment import setup_provider, reset_payment_provider
 
+def post_init_hook(env):
+    setup_provider(env, 'epayco')
 
-def post_init_hook(cr, registry):
-    setup_provider(cr, registry, 'epayco')
-
-
-def uninstall_hook(cr, registry):
-    reset_payment_provider(cr, registry, 'epayco')
+def uninstall_hook(env):
+    reset_payment_provider(env, 'epayco')

@@ -2,11 +2,18 @@
 <odoo noupdate="1">
 
     <record id="payment_provider_epayco" model="payment.provider">
-        <field name="name">ePayco</field>
-        <field name="display_as">ePayco</field>
-        <field name="image_128" type="base64" file="payment_epayco/static/src/img/epayco_icon.png"/>
+        <field name="name">Epayco</field>
+        <field name="image_128"
+               type="base64"
+               file="payment_epayco/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_epayco"/>
+        <field name="payment_method_ids"
+               eval="[(6, 0, [
+                   ref('payment.payment_method_card')
+               ])]"/>
         <field name="code">epayco</field>
-        <field name="redirect_form_view_id"  ref="redirect_form" />
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="allow_tokenization">True</field>
     </record>
+
 </odoo>

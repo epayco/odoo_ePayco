@@ -1,69 +1,86 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import hashlib
+import logging
+from hashlib import new as hashnew
 
-from odoo import api, fields, models
+import requests
 
-SUPPORTED_CURRENCIES = ('COP','USD')
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+from odoo.addons.payment_epayco import const
+
+
+_logger = logging.getLogger(__name__)
 
 
 class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 
     code = fields.Selection(
-        selection_add=[('epayco', 'Epayco')], ondelete={'epayco': 'set default'})
+        selection_add=[('epayco', "Epayco")], ondelete={'epayco': 'set default'})
     epayco_cust_id = fields.Char(
-        string="P_CUST_ID_CLIENTE",
-        help="",
-        required_if_provider='epayco',groups='base.group_system')
+        string="P_CUST_ID_CLIENTE", help="",
+        required_if_provider='epayco')
     epayco_public_key = fields.Char(
         string="PUBLIC_KEY",
-        help="The ID solely used to identify the country-dependent shop with epayco",
-        required_if_provider='epayco',groups='base.group_system')
-    epayco_private_key = fields.Char(
-        string="PRIVATE_KEY",
-        help="The ID solely used to identify the country-dependent shop with epayco",
         required_if_provider='epayco', groups='base.group_system')
+    epayco_private_key = fields.Char(
+        string="PRIVATE_KEY", required_if_provider='epayco', groups='base.group_system')
     epayco_p_key = fields.Char(
-        string="P_KEY", required_if_provider='epayco',groups='base.group_system')
+        string="P_KEY", required_if_provider='epayco', groups='base.group_system')
     epayco_checkout_type = fields.Selection(
-        selection=[('onpage', 'Onpage Checkout'),
-                   ('standard', 'Standard Checkout')],
-        required_if_provider='epayco',
-        string='Checkout Type',
-        default='onpage')
+        [('onpage', 'Onpage Checkout'), ('standard', 'Standard Checkout')],
+        string="Checkout", required_if_provider='epayco',
+    )
     epayco_checkout_lang = fields.Selection(
-        selection=[('en', 'English'),
-                   ('es', 'Español')],
-        required_if_provider='epayco',
-        string='Checkout Type',
-        default='es')
+        [('en', 'English'), ('es', 'Español')],
+        string="lenguage", required_if_provider='epayco',
+    )
+
+    #=== COMPUTE METHODS ===#
+
+    def _compute_feature_support_fields(self):
+        """ Override of `payment` to enable additional features. """
+        super()._compute_feature_support_fields()
+        self.filtered(lambda p: p.code == 'epayco').update({
+            'support_tokenization': True,
+        })
+
+    #=== BUSINESS METHODS ===#
 
     @api.model
-    def _get_compatible_providers(self, *args, currency_id=None, **kwargs):
-        """ Override of payment to unlist Epayco acquirers for unsupported currencies. """
-        providers = super()._get_compatible_providers(*args, currency_id=currency_id, **kwargs)
+    def _get_compatible_providers(self, *args, is_validation=False, **kwargs):
+        """ Override of payment to unlist epayco providers for validation operations. """
+        providers = super()._get_compatible_providers(*args, is_validation=is_validation, **kwargs)
 
-        currency = self.env['res.currency'].browse(currency_id).exists()
-        if currency and currency.name not in SUPPORTED_CURRENCIES:
-            providers = providers.filtered(lambda a: a.provider != 'epayco')
+        if is_validation:
+            providers = providers.filtered(lambda p: p.code != 'epayco')
 
         return providers
 
-    def _epayco_generate_sign(self, values, incoming=True):
-        if incoming:
-            p_key = self.epayco_p_key
-            x_ref_payco = values.get('x_ref_payco')
-            x_transaction_id = values.get('x_transaction_id')
-            x_amount = values.get('x_amount')
-            x_currency_code = values.get('x_currency_code')
-            hash_str_bytes = bytes('%s^%s^%s^%s^%s^%s' % (
-                self.epayco_cust_id,
-                p_key,
-                x_ref_payco,
-                x_transaction_id,
-                x_amount,
-                x_currency_code), 'utf-8')
-            hash_object = hashlib.sha256(hash_str_bytes)
-            hash = hash_object.hexdigest()
-        return hash
+
+    def _epayco_generate_signature(self, values, incoming=True, format_keys=False):
+
+        def _filter_key(_key):
+            return not incoming or _key in const.VALID_KEYS
+
+        key = self.epayco_shakey_out if incoming else self.epayco_shakey_in  # Swapped for epayco's POV
+        if format_keys:
+            formatted_items = [(k.upper().replace('_', '.'), v) for k, v in values.items()]
+        else:
+            formatted_items = [(k.upper(), v) for k, v in values.items()]
+        sorted_items = sorted(formatted_items)
+        signing_string = ''.join(f'{k}={v}{key}' for k, v in sorted_items if _filter_key(k) and v)
+        shasign = hashnew(self.epayco_hash_function)
+        shasign.update(signing_string.encode())
+        return shasign.hexdigest()
+
+    
+
+    def _get_default_payment_method_codes(self):
+        """ Override of `payment` to return the default payment method codes. """
+        default_codes = super()._get_default_payment_method_codes()
+        if self.code != 'epayco':
+            return default_codes
+        return const.DEFAULT_PAYMENT_METHODS_CODES
