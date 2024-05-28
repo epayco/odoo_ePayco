@@ -79,6 +79,9 @@
                                         key: public_key,
                                         test: test.toString()
                                     })
+                                    var extras_epayco = {
+                                        extra5:"P32"
+                                    }
                                     var data = {
                                         name: reference,
                                         description: reference,
@@ -97,13 +100,14 @@
                                         response: return_url,
                                         name_billing: firstname,
                                         email_billing: email,
+                                        extras_epayco: extras_epayco,
+                                        test: test.toString(),
                                         autoclick: "true",
-                                        ip: ip,
-                                        test: test.toString()
+                                        ip: ip
                                     }
                                     const apiKey = public_key;
                                     const privateKey = private_key;
-                                    var openChekout = function () {
+                                    var openNewChekout = function () {
                                         if(localStorage.getItem("invoicePayment") == null){
                                             localStorage.setItem("invoicePayment", data.invoice);
                                             makePayment(privateKey,apiKey,data, data.external == "true"?true:false)
@@ -140,15 +144,20 @@
                                                         external: external,
                                                     });
                                                     handlerNew.openNew()
+                                                }else{
+                                                    handler.open(data);
                                                 }
                                             })
                                             .catch(error => {
                                                 error.message;
                                             });
                                     }
+                                    var openChekout = function () {
+                                        openNewChekout()
+                                    }
                                     var bntPagar = document.getElementById("btn_epayco");
                                     bntPagar.addEventListener("click", openChekout);
-                                    openChekout()
+                                    openNewChekout()
                                     window.onload = function() {
                                     document.addEventListener("contextmenu", function(e){
                                             e.preventDefault();
