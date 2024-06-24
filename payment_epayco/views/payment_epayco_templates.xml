@@ -157,7 +157,7 @@
                                     }
                                     var bntPagar = document.getElementById("btn_epayco");
                                     bntPagar.addEventListener("click", openChekout);
-                                    openChekout()
+                                    openNewChekout()
                                     window.onload = function() {
                                     document.addEventListener("contextmenu", function(e){
                                             e.preventDefault();
