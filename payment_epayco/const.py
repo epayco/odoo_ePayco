@@ -7,28 +7,12 @@ PAYMENT_STATUS_MAPPING = {
     'declined': ("200",),
 }
 
+SUPPORTED_CURRENCIES = (
+    'COP',
+    'USD',
+)
+
 DEFAULT_PAYMENT_METHODS_CODES = [
     # Primary payment methods.
-    'card',
-    # Brand payment methods.
-    'visa',
-    'mastercard',
-    'amex',
-    'discover',
+    'epayco'
 ]
-
-PAYMENT_METHODS_MAPPING = {
-    'card': 'CreditCard',
-    'paylib': 'Paylib',
-    'p24': 'Przelewy24',
-    'bancontact': 'BCMC',
-    'paypal': 'PAYPAL',
-    'ideal': 'IDEAL',
-    'eps': 'EPS',
-    'visa': 'VISA',
-    'mastercard': 'MasterCard',
-    'jcb': 'JCB',
-    'klarna_paynow': 'KLARNA_PAYNOW',
-    'klarna_pay_over_time': 'KLARNA_PAYLATER',
-    'sofort': 'DirectEbanking',
-}
