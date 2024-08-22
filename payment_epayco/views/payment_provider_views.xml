@@ -6,14 +6,6 @@
         <field name="model">payment.provider</field>
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='provider_creation_warning']" position="after">
-                <div class="alert alert-danger"
-                     role="alert"
-                     invisible="code != 'epayco'">
-                    This provider is deprecated.
-                    Consider disabling it and moving to <strong>ePayco</strong>.
-                </div>
-            </xpath>
             <group name="provider_credentials" position="inside">
                 <group invisible="code != 'epayco'">
                     <field name="epayco_cust_id" required="code == 'epayco' and state != 'disabled'"/>
