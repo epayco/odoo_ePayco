@@ -1,10 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-SUPPORTED_CURRENCIES = [
-    'USD',
-    'COP'
-]
-
 PAYMENT_STATUS_MAPPING = {
     'pending': ("3"),  # 46 = 3DS
     'done': ("1"),
@@ -13,14 +8,14 @@ PAYMENT_STATUS_MAPPING = {
     'error': ('rejected',),
 }
 
+SUPPORTED_CURRENCIES = (
+    'COP',
+    'USD',
+)
+
 DEFAULT_PAYMENT_METHODS_CODES = [
     # Primary payment methods.
-    'card',
-    # Brand payment methods.
-    'visa',
-    'mastercard',
-    'amex',
-    'discover',
+    'epayco'
 ]
 
 PAYMENT_METHODS_MAPPING = {

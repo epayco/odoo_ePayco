@@ -92,10 +92,7 @@ class PaymentTransaction(models.Model):
             'cellphone': self.partner_phone or '',
             'total': payment_utils.to_minor_currency_units(self.amount, None, 2),
             'language': language,
-            'url': return_url,
-            'PM': const.PAYMENT_METHODS_MAPPING.get(
-                self.payment_method_code, self.payment_method_code
-            ),
+            'url': return_url
         }
         rendering_values.update({
             'api_url': api_url,
