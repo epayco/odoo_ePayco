@@ -3,8 +3,9 @@
 PAYMENT_STATUS_MAPPING = {
     'pending': ("3"),  # 46 = 3DS
     'done': ("1"),
-    'cancel': ("2","4","9","10","11"),
+    'canceled': ("2","4","9","10","11"),
     'declined': ("200",),
+    'error': ('rejected',),
 }
 
 SUPPORTED_CURRENCIES = (
@@ -16,3 +17,10 @@ DEFAULT_PAYMENT_METHODS_CODES = [
     # Primary payment methods.
     'epayco'
 ]
+
+PAYMENT_METHODS_MAPPING = {
+    'card': 'debit_card,credit_card,prepaid_card',
+    'paypal': 'PAYPAL',
+    'visa': 'VISA',
+    'mastercard': 'MasterCard',
+}
