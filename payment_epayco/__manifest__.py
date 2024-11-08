@@ -5,13 +5,12 @@
     'version': '2.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
-    'summary': "This module is deprecated.",
-    'description': " ",  # Non-empty string to avoid loading the README file.
+    'summary': "ePayco",
+    'description': " ",
     'depends': ['payment'],
     'data': [
         'views/payment_epayco_templates.xml',
         'views/payment_provider_views.xml',
-
         'data/payment_provider_data.xml',
     ],
     'assets': {

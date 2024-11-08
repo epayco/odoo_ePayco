@@ -1,10 +1,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+SUPPORTED_CURRENCIES = [
+    'USD',
+    'COP'
+]
+
 PAYMENT_STATUS_MAPPING = {
     'pending': ("3"),  # 46 = 3DS
     'done': ("1"),
-    'cancel': ("2","4","9","10","11"),
+    'canceled': ("2","4","9","10","11"),
     'declined': ("200",),
+    'error': ('rejected',),
 }
 
 DEFAULT_PAYMENT_METHODS_CODES = [
@@ -18,17 +24,8 @@ DEFAULT_PAYMENT_METHODS_CODES = [
 ]
 
 PAYMENT_METHODS_MAPPING = {
-    'card': 'CreditCard',
-    'paylib': 'Paylib',
-    'p24': 'Przelewy24',
-    'bancontact': 'BCMC',
+    'card': 'debit_card,credit_card,prepaid_card',
     'paypal': 'PAYPAL',
-    'ideal': 'IDEAL',
-    'eps': 'EPS',
     'visa': 'VISA',
     'mastercard': 'MasterCard',
-    'jcb': 'JCB',
-    'klarna_paynow': 'KLARNA_PAYNOW',
-    'klarna_pay_over_time': 'KLARNA_PAYLATER',
-    'sofort': 'DirectEbanking',
 }
