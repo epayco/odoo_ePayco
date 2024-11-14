@@ -4,11 +4,13 @@ import logging
 import pprint
 import uuid
 import socket
+import sys
 
 from lxml import etree, objectify
 from werkzeug import urls
 
 from odoo import _, api, models, http
+from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_repr, float_compare
 from odoo.addons.payment import utils as payment_utils
@@ -116,12 +118,28 @@ class PaymentTransaction(models.Model):
     def _process_notification_data(self, notification_data):
         super()._process_notification_data(notification_data)
         # Update the payment state.
+        order_id = notification_data.get('order_id')
+        #order = request.env['sale.order'].sudo().browse(order_id)
+        name = notification_data.get('x_extra3')
+        order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
         payment_status = notification_data.get('x_cod_response')
-        if payment_status in const.PAYMENT_STATUS_MAPPING['pending']:
+        _logger.info("order_status:\n%s", pprint.pformat(order.state))
+        _logger.info("invoice_status :\n%s", pprint.pformat(order.invoice_status))
+        _logger.info("payment_status :\n%s", payment_status)
+        #if payment_status in const.PAYMENT_STATUS_MAPPING['pending']:
+        if int(payment_status) in [3]:
             self._set_pending()
-        elif payment_status in const.PAYMENT_STATUS_MAPPING['done']:
+        #elif payment_status in const.PAYMENT_STATUS_MAPPING['done']:
+        elif int(payment_status) in [1]:
             self._set_done()
-        elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
+            if order.state == 'draft':
+                order.action_confirm()  # Confirmar la orden
+                # Opcional: Generar y validar la factura
+                if order.invoice_status == 'to invoice':
+                    invoice = order._create_invoices()
+                    invoice.action_post()
+        #elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
+        elif int(payment_status) in [2,4,9,10,11]:
             self._set_canceled()
         else:  # Classify unknown payment statuses as `error` tx state
             _logger.info(

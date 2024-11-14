@@ -76,7 +76,14 @@ class PaymentProvider(models.Model):
         shasign.update(signing_string.encode())
         return shasign.hexdigest()
 
-    
+    def _get_supported_currencies(self):
+        """ Override of `payment` to return the supported currencies. """
+        supported_currencies = super()._get_supported_currencies()
+        if self.code == 'epayco':
+            supported_currencies = supported_currencies.filtered(
+                lambda c: c.name in const.SUPPORTED_CURRENCIES
+            )
+        return supported_currencies
 
     def _get_default_payment_method_codes(self):
         """ Override of `payment` to return the default payment method codes. """

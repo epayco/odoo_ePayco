@@ -42,14 +42,63 @@ paymentForm.include({
             this._super(...arguments);
             return;
         }
-        const epaycoOptions = this._prepareEpaycoOptions(processingValues);
+        let myIp = await this._getIp();
+        const epaycoOptions = this._prepareEpaycoOptions(processingValues, myIp);
+        let epaycoSession = await this._makeSession(epaycoOptions);
+        let external = epaycoOptions.data.external == 'true' ? true:false;
         await loadJS('https://checkout.epayco.co/checkout.js');
-        console.log(epaycoOptions);
         const epaycoJS = ePayco.checkout.configure({
             key: epaycoOptions.public_key,
             test: epaycoOptions.test
         });
-        epaycoJS.open(epaycoOptions.data);
+        if(epaycoSession.success){
+                if(epaycoSession.data.sessionId != undefined){
+                const handlerNew = ePayco.checkout.configure({
+                    sessionId: epaycoSession.data.sessionId,
+                    external: external
+                });
+                handlerNew.openNew()
+            }else{
+               epaycoJS.open(epaycoOptions.data);
+            }
+        }else{
+           epaycoJS.open(epaycoOptions.data);
+        }
+    },
+    async _makeSession(epaycoOptions){
+        try {
+            const response = await fetch("https://cms.epayco.co/checkout/payment/session", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    //'X-CSRFToken': odoo.csrf_token,
+                    'privatekey': epaycoOptions.private_key,
+                    'apikey': epaycoOptions.public_key
+                },
+                body: JSON.stringify(epaycoOptions.data),
+            });
+            if (!response.ok) {
+                throw new Error(`Error en la solicitud: ${response.status}`);
+            }
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Error al realizar el fetch:', error);
+        }
+    },
+    async _getIp(){
+    try {
+            const response = await fetch("https://api.ipify.org?format=json", {
+                method: 'GET'
+            });
+            if (!response.ok) {
+                throw new Error(`Error en la solicitud: ${response.status}`);
+            }
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Error al realizar el fetch:', error);
+        }
     },
 
     /**
@@ -58,7 +107,7 @@ paymentForm.include({
      * @param {object} processingValues - The processing values.
      * @return {object}
      */
-    _prepareEpaycoOptions(processingValues) {
+    _prepareEpaycoOptions(processingValues, myIp) {
         return Object.assign({}, {
             'data': {
                 "name": processingValues['reference'],
@@ -83,7 +132,8 @@ paymentForm.include({
                 "extras_epayco": {"extra5":"P32"},
                 "test": processingValues['test'].toString(),
                 "autoclick": "true",
-                "ip": processingValues['ip']
+                //"ip": processingValues['ip']
+                "ip":myIp.ip
             },
             'public_key': processingValues['public_key'],
             'private_key': processingValues['private_key'],

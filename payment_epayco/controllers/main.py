@@ -5,6 +5,7 @@ import logging
 import pprint
 import re
 import requests
+import sys
 from werkzeug.exceptions import Forbidden
 
 from odoo import http
@@ -27,7 +28,7 @@ class EpaycoController(http.Controller):
 
     @http.route(
         '/payment/epayco/response', type='http', auth='public',
-        methods=['GET', 'POST'], csrf=False
+        methods=['GET'], csrf=False
     )  # Redirect are made with GET requests only. Webhook notifications can be set to GET or POST.
     def epayco_backend_redirec(self, **post):
         return self._epayco_process_response(post)
@@ -44,7 +45,8 @@ class EpaycoController(http.Controller):
         data_normalize = self._normalize_data_keys(data)
         if not confirmation:
             # Check the integrity of the notification_return_url
-            ref_epayco = data.get('ref_epayco')
+            ref_epayco = data.get('ref_epayco') or data.get('ref_payco')
+            _logger.info("ref payco:\n%s", ref_epayco)
             if ref_epayco is None:
                 return request.redirect('/shop/payment')
             url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
