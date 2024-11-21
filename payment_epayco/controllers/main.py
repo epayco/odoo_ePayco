@@ -52,6 +52,7 @@ class EpaycoController(http.Controller):
             url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
                 ref_epayco)
             response = requests.get(url)
+            _logger.info("data validation:\n%s", pprint.pformat(response))
             if response.status_code == 200:
                 data = response.json().get('data')
                 if int(data.get('x_cod_response')) not in [1, 3]:
