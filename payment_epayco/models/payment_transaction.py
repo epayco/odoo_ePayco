@@ -167,17 +167,17 @@ class PaymentTransaction(models.Model):
                 )
         except KeyError as e:
             # Manejar errores por claves faltantes en los datos
-            _logger.error("KeyError encountered in notification_data: %s", e)
+            _logger.error("KeyError encountered in upload order status: %s", e)
             raise ValidationError(_("Invalid notification data: Missing key %s.") % str(e))
 
         except ValidationError as e:
             # Re-lanzar errores de validación con más contexto si es necesario
-            _logger.warning("Validation error while processing epayco notification: %s", e)
+            _logger.warning("Validation error while uploading order status: %s", e)
             raise e
 
         except Exception as e:
             # Capturar cualquier otra excepción inesperada
-            _logger.exception("Unexpected error while retrieving transaction.")
+            _logger.exception("Unexpected error while upload transaction.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
 
     def _epayco_tokenize_from_notification_data(self, notification_data):
@@ -218,15 +218,15 @@ class PaymentTransaction(models.Model):
             return tax
         except KeyError as e:
             # Manejar errores por claves faltantes en los datos
-            _logger.error("KeyError encountered in notification_data: %s", e)
+            _logger.error("KeyError encountered in get tax info: %s", e)
             raise ValidationError(_("Invalid notification data: Missing key %s.") % str(e))
 
         except ValidationError as e:
             # Re-lanzar errores de validación con más contexto si es necesario
-            _logger.warning("Validation error while processing epayco notification: %s", e)
+            _logger.warning("Validation error while get tax info: %s", e)
             raise e
 
         except Exception as e:
             # Capturar cualquier otra excepción inesperada
-            _logger.exception("Unexpected error while retrieving transaction.")
+            _logger.exception("Unexpected error while get tax info.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
