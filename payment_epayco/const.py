@@ -8,14 +8,20 @@ PAYMENT_STATUS_MAPPING = {
     'error': ('rejected',),
 }
 
-SUPPORTED_CURRENCIES = (
-    'COP',
+SUPPORTED_CURRENCIES = [
     'USD',
-)
+    'COP'
+]
 
 DEFAULT_PAYMENT_METHODS_CODES = [
     # Primary payment methods.
     'epayco'
+    'card',
+    # Brand payment methods.
+    'visa',
+    'mastercard',
+    'amex',
+    'discover',
 ]
 
 PAYMENT_METHODS_MAPPING = {

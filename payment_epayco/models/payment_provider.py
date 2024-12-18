@@ -49,15 +49,6 @@ class PaymentProvider(models.Model):
 
     #=== BUSINESS METHODS ===#
 
-    def _get_supported_currencies(self):
-        """ Override of `payment` to return the supported currencies. """
-        supported_currencies = super()._get_supported_currencies()
-        if self.code == 'epayco':
-            supported_currencies = supported_currencies.filtered(
-                lambda c: c.name in const.SUPPORTED_CURRENCIES
-            )
-        return supported_currencies
-
     @api.model
     def _get_compatible_providers(self, *args, is_validation=False, **kwargs):
         """ Override of payment to unlist epayco providers for validation operations. """
