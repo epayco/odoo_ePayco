@@ -112,7 +112,7 @@ paymentForm.include({
             'data': {
                 "name": processingValues['reference'],
                 "description": processingValues['reference'],
-                "invoice": processingValues['reference']+ 'test2',
+                "invoice": processingValues['reference'],
                 "currency": processingValues['currency'],
                 "amount": processingValues['amount'].toString(),
                 "tax_base": processingValues['base_tax'].toString(),
