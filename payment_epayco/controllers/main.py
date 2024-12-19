@@ -21,7 +21,7 @@ class EpaycoController(http.Controller):
 
     @http.route(
         '/payment/epayco/checkout', type='http', auth='public',
-        methods=['GET', 'POST'], csrf=False
+        methods=['GET', 'POST'], csrf=False, website=True
     )  # Redirect are made with GET requests only. Webhook notifications can be set to GET or POST.
     def epayco_checkout(self, **post):
         """ Epayco checkout."""

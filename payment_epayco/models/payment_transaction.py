@@ -60,8 +60,10 @@ class PaymentTransaction(models.Model):
 
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
-        base_tax = float(
-            float(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2)) - float(tax))
+        client_ip = request.httprequest.remote_addr
+        #amount = float_repr(processing_values['amount'], self.currency_id.decimal_places or 2)
+        amount = self.amount
+        base_tax = float(amount) - float(tax)
         external = 'true' if self.provider_id.epayco_checkout_type == 'standard' else 'false'
         test = 'true' if self.provider_id.state == 'test' else 'false'
         return_url = urls.url_join(self.provider_id.get_base_url(), EpaycoController._return_url)
@@ -71,7 +73,7 @@ class PaymentTransaction(models.Model):
         rendering_values = {
             "public_key": self.provider_id.epayco_public_key,
             "private_key": self.provider_id.epayco_private_key,
-            "amount": str(float_repr(processing_values['amount'], self.currency_id.decimal_places or 2)),
+            "amount": str(amount),
             "tax": str(tax),
             "base_tax": str(base_tax),
             "currency": self.currency_id.name,
@@ -85,6 +87,7 @@ class PaymentTransaction(models.Model):
             "confirmation_url": confirm_url,
             "extra2": self.reference,
             "ip": ip_address,
+            "client_ip": client_ip,
             'address': self.partner_address or '',
             'zip': self.partner_zip or '',
             'city': self.partner_city or '',
