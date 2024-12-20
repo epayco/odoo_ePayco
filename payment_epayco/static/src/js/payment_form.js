@@ -46,7 +46,7 @@ paymentForm.include({
         const epaycoOptions = this._prepareEpaycoOptions(processingValues, myIp);
         let epaycoSession = await this._makeSession(epaycoOptions);
         let external = epaycoOptions.data.external == 'true' ? true:false;
-        await loadJS('https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod.js');
+        await loadJS('https://checkout.epayco.co/checkout.js');
         const epaycoJS = ePayco.checkout.configure({
             key: epaycoOptions.public_key,
             test: epaycoOptions.test
@@ -67,7 +67,7 @@ paymentForm.include({
     },
     async _makeSession(epaycoOptions){
         try {
-            const response = await fetch("https://cms.epayco.io/checkout/payment/session", {
+            const response = await fetch("https://cms.epayco.co/checkout/payment/session", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
