@@ -44,7 +44,7 @@
                             <div class="loading"></div>
                         </div>
                         <p style="text-align: center;" class="epayco-title">
-                            <span class="animated-points" id="loading-payments">Cargando metodos de pago</span>
+                            <span class="animated-points" id="loading-payments">Cargando...</span>
                             <br/>
                             <small class="epayco-subtitle"></small>
                         </p>
@@ -95,9 +95,9 @@
 
                                             var checkout_lang = lang == "es_CO" ? "es" : "en";
                                             if(lang=="es"){
-                                                document.getElementById("loading-payments").innerText='Cargando metodos de pago'
+                                                document.getElementById("loading-payments").innerText='Cargando...'
                                             }else{
-                                                document.getElementById("loading-payments").innerText='Loading payment methods'
+                                                document.getElementById("loading-payments").innerText='Loading...'
                                             }
                                             var data = {
                                                 name: reference,

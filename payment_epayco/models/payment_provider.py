@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from hashlib import new as hashnew
+import hashlib
 
 import requests
 
@@ -48,6 +48,24 @@ class PaymentProvider(models.Model):
         })
 
     #=== BUSINESS METHODS ===#
+    
+    def _epayco_generate_signature(self, values, incoming=True):
+        if incoming:
+            p_key = self.epayco_p_key
+            x_ref_payco = values.get('x_ref_payco')
+            x_transaction_id = values.get('x_transaction_id')
+            x_amount = values.get('x_amount')
+            x_currency_code = values.get('x_currency_code')
+            hash_str_bytes = bytes('%s^%s^%s^%s^%s^%s' % (
+                self.epayco_cust_id,
+                p_key,
+                x_ref_payco,
+                x_transaction_id,
+                x_amount,
+                x_currency_code), 'utf-8')
+            hash_object = hashlib.sha256(hash_str_bytes)
+            hash = hash_object.hexdigest()
+        return hash    
 
     @api.model
     def _get_compatible_providers(self, *args, is_validation=False, **kwargs):
@@ -58,23 +76,6 @@ class PaymentProvider(models.Model):
             providers = providers.filtered(lambda p: p.code != 'epayco')
 
         return providers
-
-
-    def _epayco_generate_signature(self, values, incoming=True, format_keys=False):
-
-        def _filter_key(_key):
-            return not incoming or _key in const.VALID_KEYS
-
-        key = self.epayco_shakey_out if incoming else self.epayco_shakey_in  # Swapped for epayco's POV
-        if format_keys:
-            formatted_items = [(k.upper().replace('_', '.'), v) for k, v in values.items()]
-        else:
-            formatted_items = [(k.upper(), v) for k, v in values.items()]
-        sorted_items = sorted(formatted_items)
-        signing_string = ''.join(f'{k}={v}{key}' for k, v in sorted_items if _filter_key(k) and v)
-        shasign = hashnew(self.epayco_hash_function)
-        shasign.update(signing_string.encode())
-        return shasign.hexdigest()
 
     def _get_supported_currencies(self):
         """ Override of `payment` to return the supported currencies. """
