@@ -113,6 +113,7 @@ class PaymentTransaction(models.Model):
 
             reference = notification_data.get('x_extra2')
             name = notification_data.get('x_extra3')
+            amount = notification_data.get('x_amount')
             tx = self.search([('reference', '=', reference), ('provider_code', '=', 'epayco')])
             if not tx:
                 raise ValidationError(
