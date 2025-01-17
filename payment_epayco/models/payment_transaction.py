@@ -69,7 +69,7 @@ class PaymentTransaction(models.Model):
         if provider_code != 'epayco' or len(tx) == 1:
             return tx
 
-        reference = notification_data.get('x_extra2')
+        reference = notification_data.get('x_extra2').strip()
         sign = notification_data.get('x_signature')
         if not reference or not sign:
             raise ValidationError(
