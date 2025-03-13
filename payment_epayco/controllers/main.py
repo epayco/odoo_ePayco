@@ -51,7 +51,7 @@ class EpaycoController(http.Controller):
                 _logger.info("ref payco:\n%s", ref_epayco)
                 if ref_epayco is None or ref_epayco == "undefined":
                     return request.redirect('/shop/payment')
-                url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
+                url = 'https://secure.epayco.io/validation/v1/reference/%s' % (
                     ref_epayco)
                 response = requests.get(url)
                 _logger.info("data validation:\n%s", pprint.pformat(response))
