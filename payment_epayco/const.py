@@ -15,7 +15,7 @@ SUPPORTED_CURRENCIES = [
 
 DEFAULT_PAYMENT_METHODS_CODES = [
     # Primary payment methods.
-    'epayco'
+    'epayco',
     'card',
     # Brand payment methods.
     'visa',
@@ -25,6 +25,7 @@ DEFAULT_PAYMENT_METHODS_CODES = [
 ]
 
 PAYMENT_METHODS_MAPPING = {
+    'epayco': 'ePayco',
     'card': 'debit_card,credit_card,prepaid_card',
     'paypal': 'PAYPAL',
     'visa': 'VISA',
