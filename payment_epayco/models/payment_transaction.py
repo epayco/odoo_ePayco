@@ -112,11 +112,27 @@ class PaymentTransaction(models.Model):
                 return tx
 
             reference = notification_data.get('x_extra2')
+            name = notification_data.get('x_extra3')
+            amount = notification_data.get('x_amount')
             tx = self.search([('reference', '=', reference), ('provider_code', '=', 'epayco')])
             if not tx:
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
+            order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            if order:
+                order_total = order.amount_total
+                _logger.info("order_total:\n%s", pprint.pformat(order_total))
+                order_tax = order.amount_tax
+                _logger.info("order_tax:\n%s", pprint.pformat(order_tax))
+                if float(order_total) != float(amount):
+                    raise ValidationError(
+                        "epayco: " + _("los montos no coinciden")
+                    )
+            else:
+                raise ValidationError(
+                    "epayco: " + _("Orden no encontrada")
+                )    
             return tx
         except KeyError as e:
             # Manejar errores por claves faltantes en los datos

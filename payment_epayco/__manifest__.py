@@ -2,7 +2,7 @@
 
 {
     'name': 'Payment Provider: Epayco',
-    'version': '2.0',
+    'version': '18.0',
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
     'summary': "ePayco",
