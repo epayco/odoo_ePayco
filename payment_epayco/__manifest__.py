@@ -13,7 +13,7 @@
         'views/payment_provider_views.xml',
         'data/payment_provider_data.xml',
     ],
-    'images': ['static/description/screen_image.png'],
+    'images': ['static/description/main_screenshot.png'],
     #'assets': {
         #'web.assets_frontend': [
             #'payment_epayco/static/src/js/payment_form.js',
