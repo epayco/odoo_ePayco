@@ -22,7 +22,7 @@
         <field name="epayco_cust_id">****</field>
         <field name="epayco_public_key">****</field>
         <field name="epayco_p_key">****</field>
-        <field name="image_128" type="base64" file="payment_epayco/static/src/img/epayco_icon.png"/>
+        <field name="image_128" type="base64" file="payment_epayco/static/description/icon.png"/>
         <field name="redirect_form_view_id"  ref="redirect_form" />
         <field name="support_authorization">False</field>
         <field name="support_fees_computation">False</field>
