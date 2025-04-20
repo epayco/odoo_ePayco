@@ -5,7 +5,7 @@
         <field name="name">Epayco</field>
         <field name="image_128"
                type="base64"
-               file="payment_epayco/static/description/icon.svg"/>
+               file="payment_epayco/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_epayco"/>
         <field name="payment_method_ids"
                eval="[(6, 0, [
