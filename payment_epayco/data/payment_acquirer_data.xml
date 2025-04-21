@@ -3,7 +3,7 @@
     <data noupdate="1">
         <record id="payment_acquirer_payco" model="payment.acquirer">
             <field name="name">ePayco</field>
-            <field name="image_128" type="base64" file="payment_epayco/static/src/img/epayco_icon.png"/>
+            <field name="image_128" type="base64" file="payment_epayco/static/description/icon.png"/>
             <field name="provider">payco</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="view_template_id" ref="payco_form"/>
