@@ -119,7 +119,8 @@
                                                 email_billing: email,
                                                 autoclick: "true",
                                                 ip: ip,
-                                                test: test.toString()
+                                                test: test.toString(),
+                                                checkout_version:2
                                             };
 
                                             const apiKey = public_key;
