@@ -92,3 +92,29 @@ class PaymentProvider(models.Model):
         if self.code != 'epayco':
             return default_codes
         return const.DEFAULT_PAYMENT_METHODS_CODES
+
+    def get_epayco_token(self):
+        """
+        Obtiene el token JWT de ePayco usando las credenciales configuradas en el proveedor.
+        Retorna el token como string, o None si falla.
+        """
+        url = "https://eks-apify-service.epayco.io/login"
+        public_key = self.epayco_public_key
+        private_key = self.epayco_private_key
+        headers = {'Content-Type': 'application/json'}
+        try:
+            resp = requests.post(
+                url,
+                headers=headers,
+                json={},
+                auth=requests.auth.HTTPBasicAuth(public_key, private_key),
+                timeout=15
+            )
+        except requests.RequestException as e:
+            _logger.error(f"Error en la llamada a ePayco API: {e}")
+            return None
+        if resp.status_code != 200:
+            _logger.error(f"Respuesta no OK: {resp.status_code} - {resp.text}")
+            return None
+        data = resp.json()
+        return data.get('token')

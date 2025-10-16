@@ -22,6 +22,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
+    # Método eliminado, revertido a estado original
     _inherit = 'payment.transaction'
 
     @api.model
@@ -78,7 +79,7 @@ class PaymentTransaction(models.Model):
             "base_tax": str(base_tax),
             "currency": self.currency_id.name,
             "email": self.partner_email or '',
-            "first_name": self.partner_name or '',
+            "firstname": self.partner_name or '',
             "reference": str(plit_reference[0]),
             "lang_checkout": self.provider_id.epayco_checkout_lang,
             "checkout_external": external,
@@ -249,3 +250,5 @@ class PaymentTransaction(models.Model):
             # Capturar cualquier otra excepción inesperada
             _logger.exception("Unexpected error while get tax info.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
+        
+

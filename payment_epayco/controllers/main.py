@@ -6,11 +6,13 @@ import pprint
 import re
 import requests
 import sys
+import base64
 from werkzeug.exceptions import Forbidden
 
 from odoo import http, _
 from odoo.http import request, Response
 from odoo.exceptions import UserError, ValidationError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -22,9 +24,17 @@ class EpaycoController(http.Controller):
     @http.route(
         '/payment/epayco/checkout', type='http', auth='public',
         methods=['GET', 'POST'], csrf=False, website=True
-    )  # Redirect are made with GET requests only. Webhook notifications can be set to GET or POST.
+    )
     def epayco_checkout(self, **post):
         """ Epayco checkout."""
+        provider = request.env['payment.provider'].search([('code', '=', 'epayco')], limit=1)
+        epayco_token = provider.get_epayco_token() if provider else ''
+        post = dict(post)
+        post.update({
+            'public_key': provider.epayco_public_key if provider else '',
+            'private_key': provider.epayco_private_key if provider else '',
+            'epayco_token': epayco_token,
+        })
         return request.render('payment_epayco.proccess', post)
 
     @http.route(
@@ -51,7 +61,7 @@ class EpaycoController(http.Controller):
                 _logger.info("ref payco:\n%s", ref_epayco)
                 if ref_epayco is None or ref_epayco == "undefined":
                     return request.redirect('/shop/payment')
-                url = 'https://secure.epayco.co/validation/v1/reference/%s' % (
+                url = 'https://eks-checkout-service.epayco.io/validation/v1/reference/%s' % (
                     ref_epayco)
                 response = requests.get(url)
                 _logger.info("data validation:\n%s", pprint.pformat(response))
