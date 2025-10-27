@@ -87,6 +87,7 @@ class PaymentTransaction(models.Model):
             "response_url": return_url,
             "confirmation_url": confirm_url,
             "extra2": self.reference,
+            "order_name": str(plit_reference[0]),
             "ip": ip_address,
             "client_ip": client_ip,
             'address': self.partner_address or '',
@@ -115,12 +116,14 @@ class PaymentTransaction(models.Model):
             reference = notification_data.get('x_extra2')
             name = notification_data.get('x_extra3')
             amount = notification_data.get('x_amount')
+            
             tx = self.search([('reference', '=', reference), ('provider_code', '=', 'epayco')])
             if not tx:
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
             order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            
             if order:
                 order_total = order.amount_total
                 _logger.info("order_total:\n%s", pprint.pformat(order_total))
