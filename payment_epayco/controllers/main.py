@@ -29,7 +29,7 @@ class EpaycoController(http.Controller):
         """ Epayco checkout."""
         provider = request.env['payment.provider'].sudo().search([('code', '=', 'epayco')], limit=1)
         if not provider:
-            return request.render('website.403')  # o maneja el error como prefieras
+            return request.render('website.403') 
         
         epayco_token = provider.sudo().get_epayco_token()
         

@@ -144,7 +144,7 @@ paymentForm.include({
                     "extra3": processingValues['reference']
                 },
                 "extrasEpayco": {
-                    "extra5": "P34"
+                    "extra5": "P32"
                 },
                 "epaycoMethodsDisable": [],
                 "method": "POST",
