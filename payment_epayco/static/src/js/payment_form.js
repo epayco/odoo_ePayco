@@ -48,20 +48,31 @@ paymentForm.include({
         const epaycoOptions = this._prepareEpaycoOptions(processingValues, myIp);
         let epaycoSession = await this._makeSession(epayco_token, epaycoOptions.data);
         let external = epaycoOptions.data.external == 'true' ? true : false;
-        await loadJS('https://epayco-checkout-testing.s3.us-east-1.amazonaws.com/checkout.preprod.js');
-        if (epaycoSession && epaycoSession.data && epaycoSession.data.sessionId) {
-            const handlerNew = ePayco.checkout.configure({
+        await loadJS('https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod-v2.js');
+        if (epaycoSession && epaycoSession.success && epaycoSession.data && epaycoSession.data.sessionId) {
+            const checkout = ePayco.checkout.configure({
                 sessionId: epaycoSession.data.sessionId,
-                external: external
+                type: external ? "standard" : "onepage",
+                test: epaycoOptions.data.test
             });
-            handlerNew.openNew();
+            
+            // Event handlers
+            checkout.onCreated(() => {
+                console.log("Evento cuando se crea el flujo transaccional");
+            });
+
+            checkout.onErrors(errors => {
+                console.log("Evento que notifica un error en la integración");
+                console.error(errors);
+            });
+
+            checkout.onClosed(() => {
+                console.log("Evento que notifica cuando se cierra el checkout");
+            });
+            
+            checkout.open();
         } else {
-            // Fallback: abrir checkout tradicional si no hay sessionId
-            const epaycoJS = ePayco.checkout.configure({
-                key: processingValues['public_key'],
-                test: processingValues['test']
-            });
-            epaycoJS.open(epaycoOptions.data);
+            console.error("Error: No se pudo obtener sessionId", epaycoSession);
         }
     },
     async _makeSession(epayco_token, data) {
@@ -108,28 +119,38 @@ paymentForm.include({
     _prepareEpaycoOptions(processingValues, myIp) {
         return {
             'data': {
-                "name": processingValues['reference'],
-                "description": processingValues['reference'],
+                "name": processingValues['reference'].substring(0, 50),
+                "description": processingValues['reference'].substring(0, 50),
                 "invoice": processingValues['reference'],
-                "currency": processingValues['currency'],
-                "amount": processingValues['amount'].toString(),
-                "tax_base": processingValues['base_tax'].toString(),
-                "tax": processingValues['tax'].toString(),
-                "taxIco": "0",
+                "currency": processingValues['currency'].toLowerCase(),
+                "amount": parseFloat(processingValues['amount']),
+                "taxBase": parseFloat(processingValues['base_tax']),
+                "tax": parseFloat(processingValues['tax']),
+                "taxIco": parseFloat(0),
                 "country": "CO",
                 "lang": processingValues['lang_checkout'],
-                "external": processingValues['checkout_external'],
-                "extra2": processingValues['extra2'],
-                "extra3": processingValues['reference'],
                 "confirmation": processingValues['notify_url'],
                 "response": processingValues['return_url'],
-                "name_billing": processingValues['firstname'],
-                "email_billing": processingValues['email'],
-                "autoclick": "true",
+                "billing": {
+                    "name": processingValues['firstname'],
+                    "address": processingValues['address'] || "",
+                    "email": processingValues['email'],
+                },
+                "autoclick": true,
                 "ip": myIp.ip,
-                "test": processingValues['test'].toString(),
-                "extras_epayco": {"extra5": "P32"},
-                "checkout_version": 2
+                "test": processingValues['test'].toString() === "true",
+                "extras": {
+                    "extra2": processingValues['extra2'],
+                    "extra3": processingValues['reference']
+                },
+                "extrasEpayco": {
+                    "extra5": "P32"
+                },
+                "epaycoMethodsDisable": [],
+                "method": "POST",
+                "checkout_version": "2",
+                "autoClick": false,
+                "external": processingValues['checkout_external']
             }
         };
     },

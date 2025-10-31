@@ -27,12 +27,16 @@ class EpaycoController(http.Controller):
     )
     def epayco_checkout(self, **post):
         """ Epayco checkout."""
-        provider = request.env['payment.provider'].search([('code', '=', 'epayco')], limit=1)
-        epayco_token = provider.get_epayco_token() if provider else ''
+        provider = request.env['payment.provider'].sudo().search([('code', '=', 'epayco')], limit=1)
+        if not provider:
+            return request.render('website.403') 
+        
+        epayco_token = provider.sudo().get_epayco_token()
+        
         post = dict(post)
         post.update({
-            'public_key': provider.epayco_public_key if provider else '',
-            'private_key': provider.epayco_private_key if provider else '',
+            'public_key': provider.epayco_public_key,
+            'private_key': provider.epayco_private_key,
             'epayco_token': epayco_token,
         })
         return request.render('payment_epayco.proccess', post)
