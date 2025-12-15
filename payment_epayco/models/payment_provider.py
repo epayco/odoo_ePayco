@@ -98,7 +98,7 @@ class PaymentProvider(models.Model):
         Obtiene el token JWT de ePayco usando las credenciales configuradas en el proveedor.
         Retorna el token como string, o None si falla.
         """
-        url = "https://eks-apify-service.epayco.io/login"
+        url = "https://apify.epayco.co/login"
         public_key = self.epayco_public_key
         private_key = self.epayco_private_key
         headers = {'Content-Type': 'application/json'}

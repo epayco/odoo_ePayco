@@ -48,7 +48,7 @@ paymentForm.include({
         const epaycoOptions = this._prepareEpaycoOptions(processingValues, myIp);
         let epaycoSession = await this._makeSession(epayco_token, epaycoOptions.data);
         let external = epaycoOptions.data.external == 'true' ? true : false;
-        await loadJS('https://epayco-checkout-testing.s3.amazonaws.com/checkout.preprod-v2.js');
+        await loadJS('https://checkout.epayco.co/checkout-v2.js');
         if (epaycoSession && epaycoSession.success && epaycoSession.data && epaycoSession.data.sessionId) {
             const checkout = ePayco.checkout.configure({
                 sessionId: epaycoSession.data.sessionId,
@@ -81,7 +81,7 @@ paymentForm.include({
             if (epayco_token) {
                 headers['Authorization'] = `Bearer ${epayco_token}`;
             }
-            const response = await fetch("https://eks-apify-service.epayco.io/payment/session/create", {
+            const response = await fetch("https://apify.epayco.co/payment/session/create", {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data),
@@ -119,6 +119,7 @@ paymentForm.include({
     _prepareEpaycoOptions(processingValues, myIp) {
         return {
             'data': {
+                "checkout_version": "2",
                 "name": processingValues['reference'].substring(0, 50),
                 "description": processingValues['reference'].substring(0, 50),
                 "invoice": processingValues['reference'],
@@ -127,7 +128,7 @@ paymentForm.include({
                 "taxBase": parseFloat(processingValues['base_tax']),
                 "tax": parseFloat(processingValues['tax']),
                 "taxIco": parseFloat(0),
-                "country": "CO",
+                "country": processingValues['country'],
                 "lang": processingValues['lang_checkout'],
                 "confirmation": processingValues['notify_url'],
                 "response": processingValues['return_url'],
@@ -135,6 +136,7 @@ paymentForm.include({
                     "name": processingValues['firstname'],
                     "address": processingValues['address'] || "",
                     "email": processingValues['email'],
+                    "country": processingValues['country'],
                 },
                 "autoclick": true,
                 "ip": myIp.ip,
@@ -144,11 +146,16 @@ paymentForm.include({
                     "extra3": processingValues['reference']
                 },
                 "extrasEpayco": {
-                    "extra5": "P32"
+                    "extra5": "P34"
                 },
-                "epaycoMethodsDisable": [],
+                "methodsDisable": [],
+                "dues": 1,
+                "noRedirectOnClose": true,
+                "forceResponse": false,
+                "uniqueTransactionPerBill": false,
+                "config": {},
                 "method": "POST",
-                "checkout_version": "2",
+              
                 "autoClick": false,
                 "external": processingValues['checkout_external']
             }
