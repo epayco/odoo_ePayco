@@ -43,39 +43,48 @@ paymentForm.include({
             return;
         }
         let myIp = await this._getIp();
+        // Obtener el token JWT desde los valores de procesamiento
+        const epayco_token = processingValues['epayco_token'];
         const epaycoOptions = this._prepareEpaycoOptions(processingValues, myIp);
-        let epaycoSession = await this._makeSession(epaycoOptions);
-        let external = epaycoOptions.data.external == 'true' ? true:false;
-        await loadJS('https://checkout.epayco.co/checkout.js ');
-        const epaycoJS = ePayco.checkout.configure({
-            key: epaycoOptions.public_key,
-            test: epaycoOptions.test
-        });
-        if(epaycoSession.success){
-                if(epaycoSession.data.sessionId != undefined){
-                const handlerNew = ePayco.checkout.configure({
-                    sessionId: epaycoSession.data.sessionId,
-                    external: external
-                });
-                handlerNew.openNew()
-            }else{
-               epaycoJS.open(epaycoOptions.data);
-            }
-        }else{
-           epaycoJS.open(epaycoOptions.data);
+        let epaycoSession = await this._makeSession(epayco_token, epaycoOptions.data);
+        let external = epaycoOptions.data.external == 'true' ? true : false;
+        await loadJS('https://checkout.epayco.co/checkout-v2.js');
+        if (epaycoSession && epaycoSession.success && epaycoSession.data && epaycoSession.data.sessionId) {
+            const checkout = ePayco.checkout.configure({
+                sessionId: epaycoSession.data.sessionId,
+                type: external ? "standard" : "onepage",
+                test: epaycoOptions.data.test
+            });
+            
+            // Event handlers
+            checkout.onCreated(() => {
+                console.log("Evento cuando se crea el flujo transaccional");
+            });
+
+            checkout.onErrors(errors => {
+                console.log("Evento que notifica un error en la integración");
+                console.error(errors);
+            });
+
+            checkout.onClosed(() => {
+                console.log("Evento que notifica cuando se cierra el checkout");
+            });
+            
+            checkout.open();
+        } else {
+            console.error("Error: No se pudo obtener sessionId", epaycoSession);
         }
     },
-    async _makeSession(epaycoOptions){
+    async _makeSession(epayco_token, data) {
         try {
-            const response = await fetch("https://cms.epayco.co/checkout/payment/session", {
+            const headers = { 'Content-Type': 'application/json' };
+            if (epayco_token) {
+                headers['Authorization'] = `Bearer ${epayco_token}`;
+            }
+            const response = await fetch("https://apify.epayco.co/payment/session/create", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    //'X-CSRFToken': odoo.csrf_token,
-                    'privatekey': epaycoOptions.private_key,
-                    'apikey': epaycoOptions.public_key
-                },
-                body: JSON.stringify(epaycoOptions.data),
+                headers: headers,
+                body: JSON.stringify(data),
             });
             if (!response.ok) {
                 throw new Error(`Error en la solicitud: ${response.status}`);
@@ -108,37 +117,49 @@ paymentForm.include({
      * @return {object}
      */
     _prepareEpaycoOptions(processingValues, myIp) {
-        return Object.assign({}, {
+        return {
             'data': {
-                "name": processingValues['reference'],
-                "description": processingValues['reference'],
+                "checkout_version": "2",
+                "name": processingValues['reference'].substring(0, 50),
+                "description": processingValues['reference'].substring(0, 50),
                 "invoice": processingValues['reference'],
-                "currency": processingValues['currency'],
-                "amount": processingValues['amount'].toString(),
-                "tax_base": processingValues['base_tax'].toString(),
-                "tax": processingValues['tax'].toString(),
-                "taxIco": "0".toString(),
+                "currency": processingValues['currency'].toLowerCase(),
+                "amount": parseFloat(processingValues['amount']),
+                "taxBase": parseFloat(processingValues['base_tax']),
+                "tax": parseFloat(processingValues['tax']),
+                "taxIco": parseFloat(0),
                 "country": processingValues['country'],
                 "lang": processingValues['lang_checkout'],
-                "external": processingValues['checkout_external'],
-                "extra2": processingValues['extra2'],
-                "extra3": processingValues['reference'],
-                "confirmation": processingValues['confirmation_url'],
-                "response": processingValues['response_url'],
-                "name_billing": processingValues['first_name'],
-                "email_billing": processingValues['email'],
-                "mobilephone_billing":  processingValues['cellphone'],
-                "address_billing": processingValues['address'],
-                "extras_epayco": {"extra5":"P32"},
-                "test": processingValues['test'].toString(),
-                "autoclick": "true",
-                //"ip": processingValues['ip']
-                "ip":myIp.ip
-            },
-            'public_key': processingValues['public_key'],
-            'private_key': processingValues['private_key'],
-            'test': processingValues['test'].toString()
-        });
+                "confirmation": processingValues['notify_url'],
+                "response": processingValues['return_url'],
+                "billing": {
+                    "name": processingValues['firstname'],
+                    "address": processingValues['address'] || "",
+                    "email": processingValues['email'],
+                    "country": processingValues['country'],
+                },
+                "autoclick": true,
+                "ip": myIp.ip,
+                "test": processingValues['test'].toString() === "true",
+                "extras": {
+                    "extra2": processingValues['extra2'],
+                    "extra3": processingValues['reference']
+                },
+                "extrasEpayco": {
+                    "extra5": "P34"
+                },
+                "methodsDisable": [],
+                "dues": 1,
+                "noRedirectOnClose": true,
+                "forceResponse": false,
+                "uniqueTransactionPerBill": false,
+                "config": {},
+                "method": "POST",
+              
+                "autoClick": false,
+                "external": processingValues['checkout_external']
+            }
+        };
     },
 
 });

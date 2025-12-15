@@ -6,11 +6,13 @@ import pprint
 import re
 import requests
 import sys
+import base64
 from werkzeug.exceptions import Forbidden
 
 from odoo import http, _
 from odoo.http import request, Response
 from odoo.exceptions import UserError, ValidationError
+
 
 _logger = logging.getLogger(__name__)
 
@@ -22,9 +24,21 @@ class EpaycoController(http.Controller):
     @http.route(
         '/payment/epayco/checkout', type='http', auth='public',
         methods=['GET', 'POST'], csrf=False, website=True
-    )  # Redirect are made with GET requests only. Webhook notifications can be set to GET or POST.
+    )
     def epayco_checkout(self, **post):
         """ Epayco checkout."""
+        provider = request.env['payment.provider'].sudo().search([('code', '=', 'epayco')], limit=1)
+        if not provider:
+            return request.render('website.403')  # o maneja el error como prefieras
+        
+        epayco_token = provider.sudo().get_epayco_token()
+        
+        post = dict(post)
+        post.update({
+            'public_key': provider.epayco_public_key,
+            'private_key': provider.epayco_private_key,
+            'epayco_token': epayco_token,
+        })
         return request.render('payment_epayco.proccess', post)
 
     @http.route(

@@ -22,6 +22,7 @@ _logger = logging.getLogger(__name__)
 
 
 class PaymentTransaction(models.Model):
+    # Método eliminado, revertido a estado original
     _inherit = 'payment.transaction'
 
     @api.model
@@ -78,7 +79,7 @@ class PaymentTransaction(models.Model):
             "base_tax": str(base_tax),
             "currency": self.currency_id.name,
             "email": self.partner_email or '',
-            "first_name": self.partner_name or '',
+            "firstname": self.partner_name or '',
             "reference": str(plit_reference[0]),
             "lang_checkout": self.provider_id.epayco_checkout_lang,
             "checkout_external": external,
@@ -86,6 +87,7 @@ class PaymentTransaction(models.Model):
             "response_url": return_url,
             "confirmation_url": confirm_url,
             "extra2": self.reference,
+            "order_name": str(plit_reference[0]),
             "ip": ip_address,
             "client_ip": client_ip,
             'address': self.partner_address or '',
@@ -114,12 +116,14 @@ class PaymentTransaction(models.Model):
             reference = notification_data.get('x_extra2')
             name = notification_data.get('x_extra3')
             amount = notification_data.get('x_amount')
+            
             tx = self.search([('reference', '=', reference), ('provider_code', '=', 'epayco')])
             if not tx:
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
             order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            
             if order:
                 order_total = order.amount_total
                 _logger.info("order_total:\n%s", pprint.pformat(order_total))
@@ -249,3 +253,5 @@ class PaymentTransaction(models.Model):
             # Capturar cualquier otra excepción inesperada
             _logger.exception("Unexpected error while get tax info.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
+        
+
