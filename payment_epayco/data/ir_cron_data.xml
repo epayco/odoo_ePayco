@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- SDK-1360: red de seguridad de reconciliacion para transacciones PSE
+         (u otro medio) cuyo webhook de confirmacion de ePayco
+         (/payment/epayco/confirm) nunca llego a Odoo. Consulta directamente
+         a ePayco el estado real de cualquier payment.transaction que siga
+         "pending" mas alla de EPAYCO_RECONCILE_MIN_AGE_MINUTES (ver
+         payment_epayco/const.py).
+         noupdate="1" para que un administrador pueda ajustar el intervalo
+         desde la UI sin que se resetee en la proxima actualizacion del
+         modulo. Sin `numbercall`: ese campo ya no existe en ir.cron en
+         Odoo 18 (se elimino en versiones recientes; los cron corren
+         indefinidamente mientras `active` sea True), incluirlo rompe
+         la carga de datos del modulo por completo (nota: los
+         comentarios XML no admiten doble guion, cuidado al editar
+         este bloque). -->
+    <record id="ir_cron_epayco_sync_pending_transactions" model="ir.cron">
+        <field name="name">Epayco: Reconcile pending transactions</field>
+        <field name="model_id" ref="payment.model_payment_transaction"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_epayco_sync_pending_transactions()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+
+</odoo>

@@ -12,6 +12,7 @@
         'views/payment_epayco_templates.xml',
         'views/payment_provider_views.xml',
         'data/payment_provider_data.xml',
+        'data/ir_cron_data.xml',
     ],
       'images': ['static/description/main_screenshot.png'],
     #'assets': {

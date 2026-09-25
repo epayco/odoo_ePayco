@@ -5,11 +5,12 @@ import pprint
 import uuid
 import socket
 import sys
+from datetime import timedelta
 
 from lxml import etree, objectify
 from werkzeug import urls
 
-from odoo import _, api, models, http
+from odoo import _, api, fields, models, http
 from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_repr, float_compare
@@ -72,8 +73,8 @@ class PaymentTransaction(models.Model):
         api_url = urls.url_join(self.provider_id.get_base_url(), EpaycoController._proccess_url)
         language = self.partner_lang[0:2]
         rendering_values = {
-            "public_key": self.provider_id.epayco_public_key,
-            "private_key": self.provider_id.epayco_private_key,
+            # SDK-1360: public_key/private_key removidos de aqui -- redirect_form ya no los expone
+            # en HTML plano (ver views/payment_epayco_templates.xml).
             "amount": str(amount),
             "tax": str(tax),
             "base_tax": str(base_tax),
@@ -122,7 +123,17 @@ class PaymentTransaction(models.Model):
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
-            order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            # SDK-1360: NO persistir aqui x_ref_payco (el ID numerico interno de
+            # ePayco) como provider_reference -- es un identificador distinto del
+            # que acepta el endpoint de consulta de estado
+            # (/validation/v1/reference/{ref}), que exige la referencia de la
+            # SESION de checkout (el mismo valor que sessionId, un hex largo).
+            # Esa referencia se persiste al crear la sesion
+            # (EpaycoController.epayco_checkout), no aqui -- confirmado en vivo:
+            # consultar por x_ref_payco devuelve 404 "Checkout record not
+            # found", consultar por la referencia de sesion real devuelve 200.
+
+            order = self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
             
             if order:
                 order_total = order.amount_total
@@ -158,9 +169,9 @@ class PaymentTransaction(models.Model):
             super()._process_notification_data(notification_data)
             # Update the payment state.
             order_id = notification_data.get('order_id')
-            #order = request.env['sale.order'].sudo().browse(order_id)
+            #order = self.env['sale.order'].sudo().browse(order_id)
             name = notification_data.get('x_extra3')
-            order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            order = self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
             payment_status = notification_data.get('x_cod_response')
             _logger.info("order_status:\n%s", pprint.pformat(order.state))
             _logger.info("invoice_status :\n%s", pprint.pformat(order.invoice_status))
@@ -170,13 +181,34 @@ class PaymentTransaction(models.Model):
                 self._set_pending()
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['done']:
             elif int(payment_status) in [1]:
-                self._set_done()
-                if order.state == 'draft':
-                    order.action_confirm()  # Confirmar la orden
-                    # Opcional: Generar y validar la factura
-                    if order.invoice_status == 'to invoice':
-                        invoice = order._create_invoices()
-                        invoice.action_post()
+                # SDK-1360: reintentos de PSE dentro de la MISMA sesion de
+                # checkout de ePayco (rechazar y volver a intentar sin salir
+                # del widget) reusan la misma referencia de transaccion --
+                # llegan dos webhooks distintos para el mismo tx: primero
+                # "Rechazada" (cancela la tx), despues "Aceptada" (la
+                # aprobacion real del reintento). Sin extra_allowed_states,
+                # el guard de estados de Odoo (cancel -> done no esta en la
+                # lista default de _set_done) rechaza la escritura en
+                # silencio (WARNING, no excepcion) y la tx queda cancel para
+                # siempre aunque el banco si aprobo -- confirmado en vivo
+                # contra un pago real (orden S00080, dos webhooks reales del
+                # mismo x_extra2, 90s de diferencia). Sin este fix, la orden
+                # igual se confirmaba (el bloque de abajo no dependia del
+                # resultado de _set_done), dejando la transaccion mostrando
+                # cancel pese a que el pedido si se facturo.
+                self._set_done(extra_allowed_states=('cancel',))
+                # SDK-1360: 'draft' y 'sent' (Quotation Sent) son ambos estados no
+                # confirmados de sale.order -- un pedido real de website_sale suele
+                # quedar en 'sent', no 'draft', antes del pago (confirmado con un
+                # pago real via el cron de reconciliacion: la transaccion paso a
+                # 'done' pero la orden se quedo en 'sent' porque este chequeo solo
+                # cubria 'draft'). action_confirm() es correcto para cualquiera de
+                # los dos. Solo se confirma si la tx realmente quedo 'done' -- si
+                # _set_done() no pudo aplicar el cambio por algun otro estado no
+                # contemplado, no se factura una orden sobre una transaccion que
+                # en realidad no se confirmo.
+                if self.state == 'done' and order.state in ('draft', 'sent'):
+                    self._epayco_confirm_and_invoice_order(order)
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
             elif int(payment_status) in [2,4,9,10,11]:
                 self._set_canceled()
@@ -202,6 +234,153 @@ class PaymentTransaction(models.Model):
             # Capturar cualquier otra excepción inesperada
             _logger.exception("Unexpected error while upload transaction.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
+
+    def _epayco_confirm_and_invoice_order(self, order):
+        try:
+            with self.env.cr.savepoint():
+                order.action_confirm()  # Confirmar la orden
+                # Opcional: Generar y validar la factura
+                if order.invoice_status == 'to invoice':
+                    invoice = order._create_invoices()
+                    invoice.action_post()
+        except Exception:
+            _logger.exception(
+                "epayco: payment for order %s (tx reference %s) was "
+                "approved and marked as done, but the order could "
+                "not be auto-confirmed/invoiced. It requires manual "
+                "confirmation.",
+                order.name, self.reference,
+            )
+            order.message_post(body=_(
+                "ePayco aprobo el pago de esta orden (referencia de "
+                "transaccion %s), pero no se pudo confirmar/facturar "
+                "automaticamente. Confirme la orden manualmente.",
+                self.reference,
+            ))
+
+    @api.model
+    def _epayco_process_notification_data(self, data):
+        tx_sudo = self.sudo()._get_tx_from_notification_data('epayco', data)
+        EpaycoController._verify_notification_signature(data, tx_sudo)
+        tx_sudo._handle_notification_data('epayco', data)
+        return tx_sudo
+
+    @api.model
+    def _cron_epayco_sync_pending_transactions(self):
+        if not self.env['payment.provider'].sudo().search_count(
+            [('code', '=', 'epayco')]
+        ):
+            return
+
+        now = fields.Datetime.now()
+        min_threshold = now - timedelta(
+            minutes=const.EPAYCO_RECONCILE_MIN_AGE_MINUTES
+        )
+        max_threshold = now - timedelta(
+            minutes=const.EPAYCO_RECONCILE_MAX_AGE_MINUTES
+        )
+
+        stuck_txs = self.sudo().search([
+            ('provider_code', '=', 'epayco'),
+            ('state', '=', 'pending'),
+            ('create_date', '<=', min_threshold),
+            ('create_date', '>', max_threshold),
+        ], order='create_date asc', limit=const.EPAYCO_RECONCILE_BATCH_SIZE)
+        for tx in stuck_txs:
+            if not tx.provider_reference:
+                _logger.warning(
+                    "epayco: cannot reconcile transaction %s stuck in "
+                    "pending since %s: no ePayco reference was ever "
+                    "captured for it (no notification -- not even a "
+                    "pending one -- ever reached Odoo for this "
+                    "transaction). Needs manual follow-up.",
+                    tx.reference, tx.create_date,
+                )
+                continue
+            try:
+                data = tx.provider_id._epayco_get_transaction_status(tx.provider_reference)
+                if not data:
+                    _logger.info(
+                        "epayco: reconciliation query for transaction %s "
+                        "(ref_payco %s) returned no data; will retry on "
+                        "the next cron run.",
+                        tx.reference, tx.provider_reference,
+                    )
+                    continue
+                self._epayco_process_notification_data(data)
+            except ValidationError:
+                _logger.exception(
+                    "epayco: data integrity error reconciling transaction "
+                    "%s (ref_payco %s) -- invalid signature, amount "
+                    "mismatch or order not found. Needs review.",
+                    tx.reference, tx.provider_reference,
+                )
+            except Exception:
+                # Error transitorio (red, timeout, ePayco caido, etc.):
+                # se reintenta solo, sin intervencion, en una corrida
+                # posterior del cron.
+                _logger.exception(
+                    "epayco: transient error reconciling transaction %s "
+                    "(ref_payco %s); will retry on a later cron run.",
+                    tx.reference, tx.provider_reference,
+                )
+
+        # Mas alla del tope maximo: dejar de consultar a ePayco, solo
+        # marcar para revision manual (una vez, no en cada corrida).
+        expired_txs = self.sudo().search([
+            ('provider_code', '=', 'epayco'),
+            ('state', '=', 'pending'),
+            ('create_date', '<=', max_threshold),
+        ])
+        for tx in expired_txs:
+            self._epayco_flag_reconciliation_window_expired(tx)
+
+    def _epayco_flag_reconciliation_window_expired(self, tx):
+
+        name = tx.reference.split('-')[0] if tx.reference else False
+        order = (
+            self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            if name else self.env['sale.order']
+        )
+
+        # SDK-1360: el dedup original buscaba solo `tx.reference` en el body del
+        # mensaje -- pero Odoo (el modulo `payment` core, no este) ya postea
+        # automaticamente, al crear CUALQUIER transaccion, un mensaje generico
+        # "A transaction with reference <reference> has been initiated (Epayco)."
+        # que tambien contiene esa referencia como substring. Eso hacia que
+        # `already_flagged` diera True para CUALQUIER transaccion real que
+        # hubiera pasado por el checkout normal -- antes incluso de que este
+        # metodo llegara a postear su propio mensaje -- dejando el aviso de
+        # "ventana de reconciliacion expirada" muerto en la practica (nunca se
+        # disparaba). Confirmado en vivo por odoo-qa-agent contra transacciones
+        # reales. El marcador ahora exige ademas una frase fija unica de ESTE
+        # mensaje especifico, no solo la referencia.
+        expired_marker = 'dejo de reconsultarla automaticamente'
+        already_flagged = bool(
+            order and tx.reference and order.message_ids.filtered(
+                lambda m: tx.reference in (m.body or '') and expired_marker in (m.body or '')
+            )
+        )
+        if already_flagged:
+            return
+
+        _logger.warning(
+            "epayco: transaction %s has been 'pending' for more than %s "
+            "minutes without a resolution from epayco; the reconciliation "
+            "cron will stop querying epayco for it. Needs manual "
+            "follow-up.",
+            tx.reference, const.EPAYCO_RECONCILE_MAX_AGE_MINUTES,
+        )
+        if order:
+            order.message_post(body=_(
+                "La transaccion de ePayco %(ref)s sigue 'pendiente' "
+                "despues de %(minutes)s minutos sin confirmacion. El "
+                "cron de reconciliacion dejo de reconsultarla "
+                "automaticamente; revise manualmente el estado del "
+                "pago.",
+                ref=tx.reference,
+                minutes=const.EPAYCO_RECONCILE_MAX_AGE_MINUTES,
+            ))
 
     def _epayco_tokenize_from_notification_data(self, notification_data):
         token = self.env['payment.token'].create({
