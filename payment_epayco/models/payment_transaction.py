@@ -123,16 +123,6 @@ class PaymentTransaction(models.Model):
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
-            # SDK-1360: NO persistir aqui x_ref_payco (el ID numerico interno de
-            # ePayco) como provider_reference -- es un identificador distinto del
-            # que acepta el endpoint de consulta de estado
-            # (/validation/v1/reference/{ref}), que exige la referencia de la
-            # SESION de checkout (el mismo valor que sessionId, un hex largo).
-            # Esa referencia se persiste al crear la sesion
-            # (EpaycoController.epayco_checkout), no aqui -- confirmado en vivo:
-            # consultar por x_ref_payco devuelve 404 "Checkout record not
-            # found", consultar por la referencia de sesion real devuelve 200.
-
             order = self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
             
             if order:
@@ -181,32 +171,7 @@ class PaymentTransaction(models.Model):
                 self._set_pending()
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['done']:
             elif int(payment_status) in [1]:
-                # SDK-1360: reintentos de PSE dentro de la MISMA sesion de
-                # checkout de ePayco (rechazar y volver a intentar sin salir
-                # del widget) reusan la misma referencia de transaccion --
-                # llegan dos webhooks distintos para el mismo tx: primero
-                # "Rechazada" (cancela la tx), despues "Aceptada" (la
-                # aprobacion real del reintento). Sin extra_allowed_states,
-                # el guard de estados de Odoo (cancel -> done no esta en la
-                # lista default de _set_done) rechaza la escritura en
-                # silencio (WARNING, no excepcion) y la tx queda cancel para
-                # siempre aunque el banco si aprobo -- confirmado en vivo
-                # contra un pago real (orden S00080, dos webhooks reales del
-                # mismo x_extra2, 90s de diferencia). Sin este fix, la orden
-                # igual se confirmaba (el bloque de abajo no dependia del
-                # resultado de _set_done), dejando la transaccion mostrando
-                # cancel pese a que el pedido si se facturo.
                 self._set_done(extra_allowed_states=('cancel',))
-                # SDK-1360: 'draft' y 'sent' (Quotation Sent) son ambos estados no
-                # confirmados de sale.order -- un pedido real de website_sale suele
-                # quedar en 'sent', no 'draft', antes del pago (confirmado con un
-                # pago real via el cron de reconciliacion: la transaccion paso a
-                # 'done' pero la orden se quedo en 'sent' porque este chequeo solo
-                # cubria 'draft'). action_confirm() es correcto para cualquiera de
-                # los dos. Solo se confirma si la tx realmente quedo 'done' -- si
-                # _set_done() no pudo aplicar el cambio por algun otro estado no
-                # contemplado, no se factura una orden sobre una transaccion que
-                # en realidad no se confirmo.
                 if self.state == 'done' and order.state in ('draft', 'sent'):
                     self._epayco_confirm_and_invoice_order(order)
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
@@ -343,18 +308,6 @@ class PaymentTransaction(models.Model):
             if name else self.env['sale.order']
         )
 
-        # SDK-1360: el dedup original buscaba solo `tx.reference` en el body del
-        # mensaje -- pero Odoo (el modulo `payment` core, no este) ya postea
-        # automaticamente, al crear CUALQUIER transaccion, un mensaje generico
-        # "A transaction with reference <reference> has been initiated (Epayco)."
-        # que tambien contiene esa referencia como substring. Eso hacia que
-        # `already_flagged` diera True para CUALQUIER transaccion real que
-        # hubiera pasado por el checkout normal -- antes incluso de que este
-        # metodo llegara a postear su propio mensaje -- dejando el aviso de
-        # "ventana de reconciliacion expirada" muerto en la practica (nunca se
-        # disparaba). Confirmado en vivo por odoo-qa-agent contra transacciones
-        # reales. El marcador ahora exige ademas una frase fija unica de ESTE
-        # mensaje especifico, no solo la referencia.
         expired_marker = 'dejo de reconsultarla automaticamente'
         already_flagged = bool(
             order and tx.reference and order.message_ids.filtered(
