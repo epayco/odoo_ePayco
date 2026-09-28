@@ -98,7 +98,10 @@ class PaymentProvider(models.Model):
         Obtiene el token JWT de ePayco usando las credenciales configuradas en el proveedor.
         Retorna el token como string, o None si falla.
         """
-        url = "https://apify.epayco.co/login"
+        # SDK-1360: endpoint distinto en Test Mode -- las llaves de prueba de
+        # este ecosistema no funcionan contra el endpoint de produccion (ver
+        # nota en const.py).
+        url = const.EPAYCO_LOGIN_URL_TEST if self.state == 'test' else const.EPAYCO_LOGIN_URL_PROD
         public_key = self.epayco_public_key
         private_key = self.epayco_private_key
         headers = {'Content-Type': 'application/json'}
@@ -118,3 +121,66 @@ class PaymentProvider(models.Model):
             return None
         data = resp.json()
         return data.get('token')
+
+    def _epayco_create_checkout_session(self, session_data):
+
+        token = self.get_epayco_token()
+        if not token:
+            _logger.error(
+                "epayco: no se pudo obtener el token JWT; no se puede "
+                "crear la sesion de checkout."
+            )
+            return None
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer %s' % token,
+        }
+        try:
+            response = requests.post(
+                const.EPAYCO_SESSION_CREATE_URL_TEST if self.state == 'test' else const.EPAYCO_SESSION_CREATE_URL_PROD,
+                json=session_data,
+                headers=headers,
+                timeout=15,
+            )
+        except requests.RequestException as e:
+            _logger.error("epayco: error creando sesion de checkout: %s", e)
+            return None
+        if response.status_code != 200:
+            _logger.error(
+                "epayco: respuesta no OK creando sesion de checkout: %s - %s",
+                response.status_code, response.text,
+            )
+            return None
+
+        resp_data = response.json() or {}
+        session = resp_data.get('data') or {}
+        session_id = session.get('sessionId')
+        if not resp_data.get('success') or not session_id:
+            _logger.error(
+                "epayco: respuesta invalida creando sesion de checkout: %s",
+                resp_data,
+            )
+            return None
+        return session_id
+
+    def _epayco_get_transaction_status(self, ref_epayco):
+        url = (
+            const.EPAYCO_VALIDATION_URL_TEST if self.state == 'test'
+            else const.EPAYCO_VALIDATION_URL_PROD
+        ) % (ref_epayco,)
+        try:
+            response = requests.get(url, timeout=15)
+        except requests.RequestException as e:
+            _logger.error(
+                "epayco: error querying transaction status for ref_payco %s: %s",
+                ref_epayco, e,
+            )
+            return None
+        if response.status_code != 200:
+            _logger.warning(
+                "epayco: non-200 response (%s) querying transaction status for ref_payco %s",
+                response.status_code, ref_epayco,
+            )
+            return None
+        return response.json().get('data')

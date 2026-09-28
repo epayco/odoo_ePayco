@@ -5,11 +5,12 @@ import pprint
 import uuid
 import socket
 import sys
+from datetime import timedelta
 
 from lxml import etree, objectify
 from werkzeug import urls
 
-from odoo import _, api, models, http
+from odoo import _, api, fields, models, http
 from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_repr, float_compare
@@ -72,8 +73,8 @@ class PaymentTransaction(models.Model):
         api_url = urls.url_join(self.provider_id.get_base_url(), EpaycoController._proccess_url)
         language = self.partner_lang[0:2]
         rendering_values = {
-            "public_key": self.provider_id.epayco_public_key,
-            "private_key": self.provider_id.epayco_private_key,
+            # SDK-1360: public_key/private_key removidos de aqui -- redirect_form ya no los expone
+            # en HTML plano (ver views/payment_epayco_templates.xml).
             "amount": str(amount),
             "tax": str(tax),
             "base_tax": str(base_tax),
@@ -122,7 +123,7 @@ class PaymentTransaction(models.Model):
                 raise ValidationError(
                     "epayco: " + _("No transaction found matching reference %s.", reference)
                 )
-            order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            order = self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
             
             if order:
                 order_total = order.amount_total
@@ -158,9 +159,9 @@ class PaymentTransaction(models.Model):
             super()._process_notification_data(notification_data)
             # Update the payment state.
             order_id = notification_data.get('order_id')
-            #order = request.env['sale.order'].sudo().browse(order_id)
+            #order = self.env['sale.order'].sudo().browse(order_id)
             name = notification_data.get('x_extra3')
-            order = request.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            order = self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
             payment_status = notification_data.get('x_cod_response')
             _logger.info("order_status:\n%s", pprint.pformat(order.state))
             _logger.info("invoice_status :\n%s", pprint.pformat(order.invoice_status))
@@ -170,13 +171,9 @@ class PaymentTransaction(models.Model):
                 self._set_pending()
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['done']:
             elif int(payment_status) in [1]:
-                self._set_done()
-                if order.state == 'draft':
-                    order.action_confirm()  # Confirmar la orden
-                    # Opcional: Generar y validar la factura
-                    if order.invoice_status == 'to invoice':
-                        invoice = order._create_invoices()
-                        invoice.action_post()
+                self._set_done(extra_allowed_states=('cancel',))
+                if self.state == 'done' and order.state in ('draft', 'sent'):
+                    self._epayco_confirm_and_invoice_order(order)
             #elif payment_status in const.PAYMENT_STATUS_MAPPING['cancel']:
             elif int(payment_status) in [2,4,9,10,11]:
                 self._set_canceled()
@@ -202,6 +199,141 @@ class PaymentTransaction(models.Model):
             # Capturar cualquier otra excepción inesperada
             _logger.exception("Unexpected error while upload transaction.")
             raise UserError(_("An unexpected error occurred: %s") % str(e))
+
+    def _epayco_confirm_and_invoice_order(self, order):
+        try:
+            with self.env.cr.savepoint():
+                order.action_confirm()  # Confirmar la orden
+                # Opcional: Generar y validar la factura
+                if order.invoice_status == 'to invoice':
+                    invoice = order._create_invoices()
+                    invoice.action_post()
+        except Exception:
+            _logger.exception(
+                "epayco: payment for order %s (tx reference %s) was "
+                "approved and marked as done, but the order could "
+                "not be auto-confirmed/invoiced. It requires manual "
+                "confirmation.",
+                order.name, self.reference,
+            )
+            order.message_post(body=_(
+                "ePayco aprobo el pago de esta orden (referencia de "
+                "transaccion %s), pero no se pudo confirmar/facturar "
+                "automaticamente. Confirme la orden manualmente.",
+                self.reference,
+            ))
+
+    @api.model
+    def _epayco_process_notification_data(self, data):
+        tx_sudo = self.sudo()._get_tx_from_notification_data('epayco', data)
+        EpaycoController._verify_notification_signature(data, tx_sudo)
+        tx_sudo._handle_notification_data('epayco', data)
+        return tx_sudo
+
+    @api.model
+    def _cron_epayco_sync_pending_transactions(self):
+        if not self.env['payment.provider'].sudo().search_count(
+            [('code', '=', 'epayco')]
+        ):
+            return
+
+        now = fields.Datetime.now()
+        min_threshold = now - timedelta(
+            minutes=const.EPAYCO_RECONCILE_MIN_AGE_MINUTES
+        )
+        max_threshold = now - timedelta(
+            minutes=const.EPAYCO_RECONCILE_MAX_AGE_MINUTES
+        )
+
+        stuck_txs = self.sudo().search([
+            ('provider_code', '=', 'epayco'),
+            ('state', '=', 'pending'),
+            ('create_date', '<=', min_threshold),
+            ('create_date', '>', max_threshold),
+        ], order='create_date asc', limit=const.EPAYCO_RECONCILE_BATCH_SIZE)
+        for tx in stuck_txs:
+            if not tx.provider_reference:
+                _logger.warning(
+                    "epayco: cannot reconcile transaction %s stuck in "
+                    "pending since %s: no ePayco reference was ever "
+                    "captured for it (no notification -- not even a "
+                    "pending one -- ever reached Odoo for this "
+                    "transaction). Needs manual follow-up.",
+                    tx.reference, tx.create_date,
+                )
+                continue
+            try:
+                data = tx.provider_id._epayco_get_transaction_status(tx.provider_reference)
+                if not data:
+                    _logger.info(
+                        "epayco: reconciliation query for transaction %s "
+                        "(ref_payco %s) returned no data; will retry on "
+                        "the next cron run.",
+                        tx.reference, tx.provider_reference,
+                    )
+                    continue
+                self._epayco_process_notification_data(data)
+            except ValidationError:
+                _logger.exception(
+                    "epayco: data integrity error reconciling transaction "
+                    "%s (ref_payco %s) -- invalid signature, amount "
+                    "mismatch or order not found. Needs review.",
+                    tx.reference, tx.provider_reference,
+                )
+            except Exception:
+                # Error transitorio (red, timeout, ePayco caido, etc.):
+                # se reintenta solo, sin intervencion, en una corrida
+                # posterior del cron.
+                _logger.exception(
+                    "epayco: transient error reconciling transaction %s "
+                    "(ref_payco %s); will retry on a later cron run.",
+                    tx.reference, tx.provider_reference,
+                )
+
+        # Mas alla del tope maximo: dejar de consultar a ePayco, solo
+        # marcar para revision manual (una vez, no en cada corrida).
+        expired_txs = self.sudo().search([
+            ('provider_code', '=', 'epayco'),
+            ('state', '=', 'pending'),
+            ('create_date', '<=', max_threshold),
+        ])
+        for tx in expired_txs:
+            self._epayco_flag_reconciliation_window_expired(tx)
+
+    def _epayco_flag_reconciliation_window_expired(self, tx):
+
+        name = tx.reference.split('-')[0] if tx.reference else False
+        order = (
+            self.env['sale.order'].sudo().search([('name', '=', name)], limit=1)
+            if name else self.env['sale.order']
+        )
+
+        expired_marker = 'dejo de reconsultarla automaticamente'
+        already_flagged = bool(
+            order and tx.reference and order.message_ids.filtered(
+                lambda m: tx.reference in (m.body or '') and expired_marker in (m.body or '')
+            )
+        )
+        if already_flagged:
+            return
+
+        _logger.warning(
+            "epayco: transaction %s has been 'pending' for more than %s "
+            "minutes without a resolution from epayco; the reconciliation "
+            "cron will stop querying epayco for it. Needs manual "
+            "follow-up.",
+            tx.reference, const.EPAYCO_RECONCILE_MAX_AGE_MINUTES,
+        )
+        if order:
+            order.message_post(body=_(
+                "La transaccion de ePayco %(ref)s sigue 'pendiente' "
+                "despues de %(minutes)s minutos sin confirmacion. El "
+                "cron de reconciliacion dejo de reconsultarla "
+                "automaticamente; revise manualmente el estado del "
+                "pago.",
+                ref=tx.reference,
+                minutes=const.EPAYCO_RECONCILE_MAX_AGE_MINUTES,
+            ))
 
     def _epayco_tokenize_from_notification_data(self, notification_data):
         token = self.env['payment.token'].create({
