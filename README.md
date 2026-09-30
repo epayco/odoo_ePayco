@@ -1,4 +1,4 @@
-# Epayco Payment Acquirer v18.0
+# Epayco Payment Acquirer v19.0
 
 ![Production/Stable](https://img.shields.io/badge/maturity-Production%2FStable-green.png)
 [![License: AGPL-3](https://img.shields.io/badge/licence-AGPL--3-blue.png)](http://www.gnu.org/licenses/agpl-3.0-standalone.html)
